@@ -7,12 +7,187 @@
             font-family: Arial;
             padding: 40px;
         }
+
+        .card {
+            border: 1px solid #ddd;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+        }
+
+        .date {
+            font-size: 13px;
+            color: #666;
+        }
+
+        button {
+            margin-right: 6px;
+        }
     </style>
 </head>
 <body>
 
-    <h1>Welcome to the Dashboard</h1>
-    <p>You are successfully logged in.</p>
+<h1>Welcome to the Dashboard</h1>
+<p>You are successfully logged in.</p>
+
+<hr />
+
+<h2>Employee Ideas</h2>
+
+<div style="max-width: 700px;">
+    <label><b>Submit a suggestion</b></label><br />
+    <textarea id="suggestionText" rows="4" style="width:100%;"></textarea><br />
+    <button id="btnSubmitSuggestion">Submit</button>
+    <p id="suggestionMsg" style="color:red;"></p>
+</div>
+
+<h3>Recent Suggestions</h3>
+<div id="suggestionsList"></div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+<script>
+
+    function apiUrl(method) {
+        return "/ProjectServices.asmx/" + method;
+    }
+
+    function escapeHtml(text) {
+        return String(text)
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#039;");
+    }
+
+    function redirectToLogin() {
+        window.location.href = "login.html";
+    }
+
+    function loadSuggestions() {
+        $.ajax({
+            type: "POST",
+            url: apiUrl("GetSuggestions"),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (res) {
+
+                if (!res.d) {
+                    redirectToLogin();
+                    return;
+                }
+
+                const rows = res.d;
+
+                if (rows.length === 0) {
+                    $("#suggestionsList").html("<p>No suggestions yet.</p>");
+                    return;
+                }
+
+                let html = "";
+
+                rows.forEach(s => {
+                    html += `
+                        <div class="card">
+                            <div class="date">${s.CreatedDate}</div>
+                            <div style="margin:8px 0;">
+                                ${escapeHtml(s.SuggestionText)}
+                            </div>
+                            <button onclick="vote(${s.SuggestionID}, true)">
+                                👍 ${s.UpVotes}
+                            </button>
+                            <button onclick="vote(${s.SuggestionID}, false)">
+                                👎 ${s.DownVotes}
+                            </button>
+                        </div>
+                    `;
+                });
+
+                $("#suggestionsList").html(html);
+            },
+            error: function () {
+                $("#suggestionsList").html("<p>Error loading suggestions.</p>");
+            }
+        });
+    }
+
+    function vote(id, isUp) {
+        $.ajax({
+            type: "POST",
+            url: apiUrl("VoteSuggestion"),
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify({
+                suggestionId: id,
+                isUpvote: isUp
+            }),
+            dataType: "json",
+            success: function (res) {
+
+                if (!res.d.success) {
+                    if (res.d.message.includes("logged")) {
+                        redirectToLogin();
+                        return;
+                    }
+                    alert(res.d.message);
+                    return;
+                }
+
+                loadSuggestions();
+            },
+            error: function () {
+                alert("Vote failed.");
+            }
+        });
+    }
+
+    $(document).ready(function () {
+
+        $("#btnSubmitSuggestion").click(function () {
+
+            const text = $("#suggestionText").val().trim();
+
+            if (!text) {
+                $("#suggestionMsg").text("Suggestion cannot be empty.");
+                return;
+            }
+
+            $.ajax({
+                type: "POST",
+                url: apiUrl("AddSuggestion"),
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({
+                    suggestionText: text
+                }),
+                dataType: "json",
+                success: function (res) {
+
+                    if (!res.d.success) {
+
+                        if (res.d.message.includes("logged")) {
+                            redirectToLogin();
+                            return;
+                        }
+
+                        $("#suggestionMsg").text(res.d.message);
+                        return;
+                    }
+
+                    $("#suggestionMsg").css("color", "green");
+                    $("#suggestionMsg").text("Suggestion submitted.");
+                    $("#suggestionText").val("");
+                    loadSuggestions();
+                },
+                error: function () {
+                    $("#suggestionMsg").text("Submit failed.");
+                }
+            });
+        });
+
+        loadSuggestions();
+    });
+
+</script>
 
 </body>
 </html>
