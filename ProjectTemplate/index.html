@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8" />
 	<title></title>
-	<!--DO NOT FORGET THIS SCRIPT TAG SO YOU CAN USE JQUERY!!!!!-->
+	<!--DO NOT FORGET THIS SCRIPT TAG SO YOU CAN USE QUERY!!!!!-->
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 
 	<!--YOUR OWN JAVASCRIPT CAN GO RIGHT HERE-->
@@ -24,7 +24,7 @@
 					alert(responseFromServer);
 				},
 				error: function (e) {
-					alert("this code will only execute if javascript is unable to access the webservice");
+					alert("Error accessing web service!\n\nStatus: " + e.status + "\nError: " + e.statusText + "\n\nMake sure you're running this through Visual Studio (F5), not opening the HTML file directly!");
 				}
 			});
 		}
