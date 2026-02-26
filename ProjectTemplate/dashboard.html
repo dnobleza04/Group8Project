@@ -279,13 +279,13 @@
 <p>You are successfully logged in.</p>
 
 <body>
+
   <!-- Manager Analytics Dashboard -->
   <section class="manager-analytics" aria-label="Manager Analytics Dashboard">
   <h3 class="ma-title">Manager Analytics Dashboard</h3>
 
   <div class="ma-block">
     <div class="ma-label-row">
-      <span class="ma-label">Admin Questions Completion:</span>
       <span id="maCompletionText" class="ma-value" style="display:none;"></span>
     </div>
 
@@ -326,11 +326,7 @@
   <div class="ma-block ma-top-concern">
     <div class="ma-label-row">
       <span class="ma-label">Top Concern:</span>
-      <span class="ma-top-pill" id="maTopConcern">1:1</span>
-      <span class="ma-top-sub" id="maTopConcernCount">24</span>
       <span class="ma-icons" aria-hidden="true">
-        <span class="ma-icon ma-flag">🚩</span>
-        <span class="ma-icon ma-thumb">👎</span>
       </span>
     </div>
   </div>
@@ -377,7 +373,20 @@
 </div>
 
 <h3>Recent Suggestions</h3>
-<div id="suggestionsList"></div>
+<div id="suggestionsList">
+  
+  <!-- Filter Suggestions -->
+<select id="statusFilter">
+  <option value="All">All</option>
+  <option value="Under Review">Under Review</option>
+  <option value="Planned">Planned</option>
+  <option value="Implemented">Implemented</option>
+  <button class="saveStatusBtn">Save</button>
+<span class="statusMsg" style="font-size:12px;"></span>
+</select>
+
+</div>
+
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 
@@ -400,127 +409,220 @@
         window.location.href = "login.html";
     }
 
-    function loadSuggestions() {
-        $.ajax({
-            type: "POST",
-            url: apiUrl("GetSuggestions"),
-            contentType: "application/json; charset=utf-8",
-            dataType: "json",
-            success: function (res) {
 
-                if (!res.d) {
-                    redirectToLogin();
-                    return;
-                }
+// Load Suggestions 
+function loadSuggestions() {
+  const filter = $("#statusFilter").val() || "All";
 
-                const rows = res.d;
+  $.ajax({
+    type: "POST",
+    url: apiUrl("GetSuggestions"),
+    contentType: "application/json; charset=utf-8",
+    data: JSON.stringify({ statusFilter: filter }),
+    dataType: "json",
+    success: function (res) {
 
-                if (rows.length === 0) {
-                    $("#suggestionsList").html("<p>No suggestions yet.</p>");
-                    return;
-                }
+      if (!res.d) { // null => not logged in
+        redirectToLogin();
+        return;
+      }
 
-                let html = "";
+      const rows = res.d;
+      if (rows.length === 0) {
+        $("#suggestionsList").html("<p>No suggestions yet.</p>");
+        return;
+      }
 
-                rows.forEach(s => {
-                    html += `
-                        <div class="card">
-                            <div class="date">${s.CreatedDate}</div>
-                            <div style="margin:8px 0;">
-                                ${escapeHtml(s.SuggestionText)}
-                            </div>
-                            <button onclick="vote(${s.SuggestionID}, true)">
-                                👍 ${s.UpVotes}
-                            </button>
-                            <button onclick="vote(${s.SuggestionID}, false)">
-                                👎 ${s.DownVotes}
-                            </button>
-                        </div>
-                    `;
-                });
+      let html = "";
+      rows.forEach(s => {
+        html += `
+          <div class="card" data-id="${s.SuggestionID}">
+            <div class="date">${s.CreatedDate}</div>
 
-                $("#suggestionsList").html(html);
-            },
-            error: function () {
-                $("#suggestionsList").html("<p>Error loading suggestions.</p>");
-            }
-        });
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;">
+              <div style="margin:8px 0; flex: 1;">
+                ${escapeHtml(s.SuggestionText)}
+              </div>
+              <span class="badge">${escapeHtml(s.Status || "Under Review")}</span>
+            </div>
+
+            <button onclick="vote(${s.SuggestionID}, true)">👍 ${s.UpVotes}</button>
+            <button onclick="vote(${s.SuggestionID}, false)">👎 ${s.DownVotes}</button>
+
+            <div style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+              <label>Status:</label>
+              <select class="statusSelect">
+                <option value="Under Review" ${s.Status === "Under Review" ? "selected" : ""}>Under Review</option>
+                <option value="Planned" ${s.Status === "Planned" ? "selected" : ""}>Planned</option>
+                <option value="Implemented" ${s.Status === "Implemented" ? "selected" : ""}>Implemented</option>
+              </select>
+              <button class="saveStatusBtn">Save</button>
+              <span class="statusMsg" style="font-size:12px;"></span>
+            </div>
+          </div>
+        `;
+      });
+
+      $("#suggestionsList").html(html);
+    },
+    error: function () {
+      $("#suggestionsList").html("<p>Error loading suggestions.</p>");
     }
+  });
+}
 
-    function vote(id, isUp) {
-        $.ajax({
-            type: "POST",
-            url: apiUrl("VoteSuggestion"),
-            contentType: "application/json; charset=utf-8",
-            data: JSON.stringify({
-                suggestionId: id,
-                isUpvote: isUp
-            }),
-            dataType: "json",
-            success: function (res) {
 
-                if (!res.d.success) {
-                    if (res.d.message.includes("logged")) {
-                        redirectToLogin();
-                        return;
-                    }
-                    alert(res.d.message);
-                    return;
-                }
+// new vote funtion
 
-                loadSuggestions();
-            },
-            error: function () {
-                alert("Vote failed.");
-            }
-        });
+function vote(id, isUp) {
+  const method = isUp ? "UpvoteSuggestion" : "DownvoteSuggestion";
+
+  $.ajax({
+    type: "POST",
+    url: apiUrl(method),
+    contentType: "application/json; charset=utf-8",
+    data: JSON.stringify({ suggestionID: id }),
+    dataType: "json",
+    success: function (res) {
+      if (!res.d.success) {
+        if (res.d.message.includes("logged")) {
+          redirectToLogin();
+          return;
+        }
+        alert(res.d.message);
+        return;
+      }
+      loadSuggestions();
+    },
+    error: function () {
+      alert("Vote failed.");
     }
+  });
+}
 
-    $(document).ready(function () {
 
-        $("#btnSubmitSuggestion").click(function () {
+    // function vote(id, isUp) {
+    //     $.ajax({
+    //         type: "POST",
+    //         url: apiUrl("VoteSuggestion"),
+    //         contentType: "application/json; charset=utf-8",
+    //         data: JSON.stringify({
+    //             suggestionId: id,
+    //             isUpvote: isUp
+    //         }),
+    //         dataType: "json",
+    //         success: function (res) {
 
-            const text = $("#suggestionText").val().trim();
+    //             if (!res.d.success) {
+    //                 if (res.d.message.includes("logged")) {
+    //                     redirectToLogin();
+    //                     return;
+    //                 }
+    //                 alert(res.d.message);
+    //                 return;
+    //             }
 
-            if (!text) {
-                $("#suggestionMsg").text("Suggestion cannot be empty.");
-                return;
-            }
+    //             loadSuggestions();
+    //         },
+    //         error: function () {
+    //             alert("Vote failed.");
+    //         }
+    //     });
+    // }
 
-            $.ajax({
-                type: "POST",
-                url: apiUrl("AddSuggestion"),
-                contentType: "application/json; charset=utf-8",
-                data: JSON.stringify({
-                    suggestionText: text
-                }),
-                dataType: "json",
-                success: function (res) {
+    // $(document).ready(function () {
 
-                    if (!res.d.success) {
+    //     $("#btnSubmitSuggestion").click(function () {
 
-                        if (res.d.message.includes("logged")) {
-                            redirectToLogin();
-                            return;
-                        }
+    //         const text = $("#suggestionText").val().trim();
 
-                        $("#suggestionMsg").text(res.d.message);
-                        return;
-                    }
+    //         if (!text) {
+    //             $("#suggestionMsg").text("Suggestion cannot be empty.");
+    //             return;
+    //         }
 
-                    $("#suggestionMsg").css("color", "green");
-                    $("#suggestionMsg").text("Suggestion submitted.");
-                    $("#suggestionText").val("");
-                    loadSuggestions();
-                },
-                error: function () {
-                    $("#suggestionMsg").text("Submit failed.");
-                }
-            });
-        });
+    //         $.ajax({
+    //             type: "POST",
+    //             url: apiUrl("AddSuggestion"),
+    //             contentType: "application/json; charset=utf-8",
+    //             data: JSON.stringify({
+    //                 suggestionText: text
+    //             }),
+    //             dataType: "json",
+    //             success: function (res) {
 
-        loadSuggestions();
-    });
+    //                 if (!res.d.success) {
+
+    //                     if (res.d.message.includes("logged")) {
+    //                         redirectToLogin();
+    //                         return;
+    //                     }
+
+    //                     $("#suggestionMsg").text(res.d.message);
+    //                     return;
+    //                 }
+
+    //                 $("#suggestionMsg").css("color", "green");
+    //                 $("#suggestionMsg").text("Suggestion submitted.");
+    //                 $("#suggestionText").val("");
+    //                 loadSuggestions();
+    //             },
+    //             error: function () {
+    //                 $("#suggestionMsg").text("Submit failed.");
+    //             }
+    //         });
+    //     });
+
+    //     loadSuggestions();
+    // });
+
+
+  //Update Status change for admins
+$(document).on("click", ".saveStatusBtn", function () {
+  const $card = $(this).closest(".card");
+  const id = parseInt($card.attr("data-id"), 10);
+  const status = $card.find(".statusSelect").val();
+  const $msg = $card.find(".statusMsg");
+
+  $msg.text("Saving...");
+
+  $.ajax({
+    type: "POST",
+    url: apiUrl("UpdateSuggestionStatus"),
+    contentType: "application/json; charset=utf-8",
+    data: JSON.stringify({ suggestionID: id, status: status }),
+    dataType: "json",
+    success: function (res) {
+      if (!res.d.success) {
+        $msg.text(res.d.message);
+        return;
+      }
+      $msg.text("Saved ✅");
+      loadSuggestions();
+    },
+    error: function () {
+      $msg.text("Save failed ❌");
+    }
+  });
+});
+
+$(document).on("change", "#statusFilter", loadSuggestions);
+
+//status save button click 
+$(document).on("click", ".saveStatusBtn", function () {
+    const $card = $(this).closest(".card");
+    const id = parseInt($card.attr("data-id"), 10);
+    const status = $card.find(".statusSelect").val();
+    const $msg = $card.find(".statusMsg");
+
+    $msg.text("Saving...");
+    updateSuggestionStatus(id, status, $msg);
+});
+
+// reload when filter changes
+$(document).on("change", "#statusFilter", function () {
+    loadSuggestions();
+});
 
     // Dashboard Updating logic 
 function loadDashboard() {
@@ -813,6 +915,7 @@ $(document).ready(function () {
 
   renderCard();
 });
+
 
 
 </script>
