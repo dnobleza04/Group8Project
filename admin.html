@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard</title>
+
+  <style>
+    body{
+      margin:0;
+      font-family: Arial, sans-serif;
+      background:#0b0f19;
+      color:#fff;
+    }
+
+    /* simple top bar (NO logo) */
+    .topbar{
+      background: rgba(17,24,39,0.9);
+      border-bottom: 1px solid #2b364a;
+      padding: 14px 16px;
+    }
+    .topbarInner{
+      max-width:1100px;
+      margin:0 auto;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:14px;
+      flex-wrap:wrap;
+    }
+    .brand{
+      font-weight:800;
+      font-size: 22px;
+      letter-spacing:.2px;
+    }
+    .nav{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      font-size:14px;
+    }
+    .nav a{
+      text-decoration:none;
+      color:#b7c0d1;
+      padding: 6px 10px;
+      border-radius: 10px;
+      border: 1px solid transparent;
+    }
+    .nav a.active{
+      color:#fff;
+      background: rgba(96,165,250,0.12);
+      border: 1px solid rgba(96,165,250,0.25);
+    }
+
+    .container{
+      max-width:1100px;
+      margin: 22px auto;
+      padding: 0 16px;
+    }
+
+    .pageTitle{
+      font-size:34px;
+      margin: 6px 0 8px 0;
+    }
+    .subtext{
+      margin:0 0 16px 0;
+      color:#b7c0d1;
+      font-size:14px;
+      line-height:1.4;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap:14px;
+      align-items:start;
+    }
+    @media (max-width: 950px){
+      .grid{ grid-template-columns: 1fr; }
+    }
+
+    .card{
+      background:#111827;
+      border: 1px solid #2b364a;
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+    }
+    .cardHeader{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      margin-bottom:10px;
+      flex-wrap:wrap;
+    }
+    .cardHeader h2{
+      margin:0;
+      font-size:18px;
+    }
+    .pill{
+      font-size:12px;
+      color:#b7c0d1;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid #2b364a;
+      padding: 4px 10px;
+      border-radius: 999px;
+    }
+
+    .row{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      padding: 12px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid #2b364a;
+      border-radius: 14px;
+      margin-bottom: 10px;
+    }
+    .rowLeft{ flex:1; }
+    .ideaText{
+      margin:0;
+      font-size:14px;
+      line-height:1.35;
+    }
+    .meta{
+      margin-top:6px;
+      font-size:12px;
+      color:#b7c0d1;
+    }
+
+    button{
+      border:none;
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-weight:700;
+      cursor:pointer;
+      white-space:nowrap;
+    }
+    .btnRemove{
+      background:#ef4444;
+      color:#0b0f19;
+    }
+    .btnRetire{
+      background:#f59e0b;
+      color:#0b0f19;
+    }
+    button:disabled{
+      opacity:.55;
+      cursor:not-allowed;
+    }
+
+    .badge{
+      display:inline-block;
+      margin-left:10px;
+      font-size:12px;
+      font-weight:700;
+      padding: 3px 10px;
+      border-radius: 999px;
+      border: 1px solid #2b364a;
+      color:#b7c0d1;
+      background: rgba(255,255,255,0.03);
+    }
+
+    .empty{
+      padding: 12px;
+      border: 1px dashed #2b364a;
+      border-radius: 14px;
+      color:#b7c0d1;
+      font-size:13px;
+      background: rgba(255,255,255,0.02);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="topbar">
+    <div class="topbarInner">
+      <div class="brand">Employee Feedback</div>
+      <div class="nav">
+        <a class="active" href="#">Admin</a>
+        <a href="#">Employee</a>
+        <a href="#">Submit Idea</a>
+        <a href="#">Help</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="pageTitle">Admin Dashboard</div>
+    <p class="subtext">
+      View ideas by support level, remove inappropriate ideas, and retire prompts to prevent repeated questions.
+    </p>
+
+    <div class="grid">
+      <div class="card">
+        <div class="cardHeader">
+          <h2>Ideas</h2>
+          <span class="pill">Sorted MOST → LEAST liked</span>
+        </div>
+        <div id="ideasList"></div>
+      </div>
+
+      <div class="card">
+        <div class="cardHeader">
+          <h2>Prompts</h2>
+          <span class="pill">Retire when done</span>
+        </div>
+        <div id="promptList"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ======================
+    // Storage keys
+    // ======================
+    const PROMPTS_KEY = "swipe_prompts";
+
+    // Seed prompts if missing (so Prompts doesn't look empty)
+    if (!localStorage.getItem(PROMPTS_KEY)) {
+      localStorage.setItem(PROMPTS_KEY, JSON.stringify([
+        { id: 1, text: "The tools I use are up to date for my job.", status: "active", count: 0, threshold: 5 },
+        { id: 2, text: "Team communication is clear and consistent.", status: "active", count: 0, threshold: 5 },
+        { id: 3, text: "Meetings are productive and action-oriented.", status: "active", count: 0, threshold: 5 }
+      ]));
+    }
+
+    // Demo ideas (replace later if your project pulls from real data)
+    let ideas = [
+      { id: 1, text: "Standardize weekly check-ins.", likes: 5, dislikes: 8 },
+      { id: 2, text: "Shared FAQ page.", likes: 12, dislikes: 2 },
+      { id: 3, text: "More training resources.", likes: 3, dislikes: 6 }
+    ];
+
+    function escapeHtml(str){
+      return str.replace(/[&<>"']/g, (m) => ({
+        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+      }[m]));
+    }
+
+    function supportPercent(i){
+      const total = i.likes + i.dislikes;
+      if (total === 0) return 0;
+      return (i.likes / total) * 100;
+    }
+
+    function renderIdeas(){
+      const list = document.getElementById("ideasList");
+      list.innerHTML = "";
+
+      // MOST → LEAST liked
+      const sorted = [...ideas].sort((a,b) => supportPercent(b) - supportPercent(a));
+
+      if(sorted.length === 0){
+        list.innerHTML = `<div class="empty">No ideas to review right now.</div>`;
+        return;
+      }
+
+      sorted.forEach(i => {
+        const row = document.createElement("div");
+        row.className = "row";
+        row.innerHTML = `
+          <div class="rowLeft">
+            <p class="ideaText">${escapeHtml(i.text)}</p>
+            <div class="meta">
+              Support: ${supportPercent(i).toFixed(1)}% • Likes: ${i.likes} • Dislikes: ${i.dislikes}
+            </div>
+          </div>
+          <button class="btnRemove" onclick="removeIdea(${i.id})">Remove</button>
+        `;
+        list.appendChild(row);
+      });
+    }
+
+    function removeIdea(id){
+      if(!confirm("Remove this idea?")) return;
+      ideas = ideas.filter(i => i.id !== id);
+      renderIdeas();
+    }
+
+    function renderPrompts(){
+      const list = document.getElementById("promptList");
+      list.innerHTML = "";
+      const prompts = JSON.parse(localStorage.getItem(PROMPTS_KEY) || "[]");
+
+      if(prompts.length === 0){
+        list.innerHTML = `<div class="empty">No prompts found.</div>`;
+        return;
+      }
+
+      prompts.forEach(p => {
+        const isRetired = p.status === "retired";
+        const row = document.createElement("div");
+        row.className = "row";
+        row.innerHTML = `
+          <div class="rowLeft">
+            <p class="ideaText">
+              ${escapeHtml(p.text)}
+              <span class="badge">${isRetired ? "Retired" : "Active"}</span>
+            </p>
+            <div class="meta">Responses: ${p.count} • Auto-retire at: ${p.threshold}</div>
+          </div>
+          <button class="btnRetire" onclick="retirePrompt(${p.id})" ${isRetired ? "disabled" : ""}>Retire</button>
+        `;
+        list.appendChild(row);
+      });
+    }
+
+    function retirePrompt(id){
+      if(!confirm("Retire this prompt? Employees will no longer see it.")) return;
+
+      let prompts = JSON.parse(localStorage.getItem(PROMPTS_KEY) || "[]");
+      prompts = prompts.map(p => (p.id === id ? { ...p, status:"retired" } : p));
+      localStorage.setItem(PROMPTS_KEY, JSON.stringify(prompts));
+      renderPrompts();
+    }
+
+    // Init + make onclick work
+    renderIdeas();
+    renderPrompts();
+    window.removeIdea = removeIdea;
+    window.retirePrompt = retirePrompt;
+  </script>
+</body>
+</html>
