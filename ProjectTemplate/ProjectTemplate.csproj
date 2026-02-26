@@ -90,9 +90,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="dashboard.html" />
     <Content Include="Global.asax" />
     <Content Include="index.html" />
+    <Content Include="login.html" />
     <Content Include="ProjectServices.asmx" />
+    <Content Include="voting.js" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>

@@ -1,0 +1,683 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard</title>
+    <style>
+        body {
+            font-family: Arial;
+            padding: 40px;
+        }
+
+        .card {
+            border: 1px solid #ddd;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+        }
+
+        .date {
+            font-size: 13px;
+            color: #666;
+        }
+
+        button {
+            margin-right: 6px;
+            padding: 6px 12px;
+            border: none;
+        }
+
+         /* Dashboard Card */
+  .manager-analytics{
+    background:#fff;
+    border:1px solid #e6eaf2;
+    border-radius:14px;
+    padding:16px 16px 14px;
+    box-shadow:0 6px 20px rgba(18,38,63,.06);
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    color:#14223a;
+    max-width:420px;
+  }
+
+  .ma-title{
+    margin:0 0 10px;
+    font-size:18px;
+    font-weight:700;
+  }
+
+  .ma-block{ margin-top:12px; }
+
+  .ma-label-row{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+
+  .ma-label{
+    font-size:14px;
+    font-weight:600;
+    color:#1c2e4a;
+  }
+
+  .ma-value{
+    margin-left:auto;
+    font-size:14px;
+    font-weight:700;
+    color:#1c2e4a;
+  }
+
+ /* completion progress */
+  .ma-progress{
+    margin-top:8px;
+    height:10px;
+    background:#eef2f7;
+    border-radius:999px;
+    overflow:hidden;
+  }
+  .ma-progress-fill{
+    height:100%;
+    background:#2fbf71; /* green */
+    border-radius:999px;
+    width:0%;
+    transition:width .35s ease;
+  }
+
+    /* Top concern row */
+  .ma-top-concern .ma-value{ display:none; }
+
+  .ma-top-pill{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    padding:3px 10px;
+    border-radius:999px;
+    background:#f1f4f9;
+    border:1px solid #e6eaf2;
+    font-weight:700;
+    font-size:12px;
+    color:#1c2e4a;
+  }
+
+  .ma-top-sub{
+    font-size:12px;
+    color:#6b7a90;
+    font-weight:700;
+  }
+
+  .ma-icons{
+    margin-left:auto;
+    display:flex;
+    gap:6px;
+    opacity:.85;
+  }
+  .ma-icon{
+    font-size:14px;
+    line-height:1;
+  }
+
+ /* //bars for analytics  */
+  .ma-subtitle{
+    font-size:14px;
+    font-weight:700;
+    color:#1c2e4a;
+    margin-bottom:8px;
+  }
+
+  .ma-topics{
+    list-style:none;
+    padding:0;
+    margin:0;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+
+  .ma-topic{
+    display:grid;
+    grid-template-columns: 22px 1fr 110px 42px;
+    align-items:center;
+    gap:10px;
+  }
+
+  .ma-topic-icon{
+    width:22px; height:22px;
+    display:grid; place-items:center;
+    background:#f5f7fb;
+    border:1px solid #e6eaf2;
+    border-radius:6px;
+    font-size:13px;
+  }
+
+  .ma-topic-name{
+    font-size:13px;
+    font-weight:600;
+    color:#2a3b57;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+
+  .ma-mini-bar{
+    height:10px;
+    background:#eef2f7;
+    border-radius:999px;
+    overflow:hidden;
+    position:relative;
+  }
+
+  .ma-mini-fill{
+    height:100%;
+    width:0%;
+    border-radius:999px;
+    transition:width .35s ease;
+  }
+
+  .ma-topic-pct{
+    text-align:right;
+    font-size:13px;
+    font-weight:700;
+    color:#2a3b57;
+  }
+
+  .ma-footnote{
+    margin:12px 0 0;
+    font-size:12px;
+    color:#6b7a90;
+    line-height:1.35;
+  }
+
+  /* Begining of req and optional */
+  .required {
+  color: white;
+  background-color: red;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.optional {
+  color: gray;
+  font-size: 12px;
+}
+
+/* carasel cards */
+#surveyCarousel {
+  max-width: 720px;
+  margin: 24px auto;
+  font-family: Arial, sans-serif;
+}
+
+.card {
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  padding: 18px;
+  min-height: 160px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  margin-left: 10px;
+  vertical-align: middle;
+}
+
+.badge.required {
+  background: #e53935;
+  color: white;
+}
+
+.badge.optional {
+  background: #f3f3f3;
+  color: #333;
+}
+
+.nav {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.nav button {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  background: white;
+  cursor: pointer;
+}
+
+.nav button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.error {
+  margin-top: 10px;
+  color: #b00020;
+  font-size: 13px;
+}
+
+.vote-done-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border: 1px solid #ddd;
+  border-radius: 999px;
+  font-size: 12px;
+  color: #555;
+  margin-top: 8px;
+  background: #f7f7f7;
+}
+
+  </style>
+    </style>
+    <meta charset="utf-8" />
+  <title>Admin Engagement Dashboard</title>
+
+  <!-- jQuery -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+
+
+  <!-- Chart.js (you need this for new Chart(...)) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+</head>
+<body>
+
+<h1>Welcome to the Dashboard</h1>
+<p>You are successfully logged in.</p>
+
+<body>
+  <!-- Manager Analytics Dashboard -->
+  <section class="manager-analytics" aria-label="Manager Analytics Dashboard">
+  <h3 class="ma-title">Manager Analytics Dashboard</h3>
+
+  <div class="ma-block">
+    <div class="ma-label-row">
+      <span class="ma-label">Admin Questions Completion:</span>
+      <span id="maCompletionText" class="ma-value" style="display:none;"></span>
+    </div>
+
+  <div class="ma-block">
+  <div class="ma-subtitle">Participation</div>
+
+  <!-- Required Answered -->
+  <div class="ma-label-row">
+    <span class="ma-label">Employee Answered (Required):</span>
+    <span class="ma-value"><span id="reqAnsweredNum">0</span> / 50</span>
+  </div>
+  <div class="ma-progress" role="progressbar" aria-valuemin="0" aria-valuemax="50" aria-valuenow="0">
+    <div class="ma-progress-fill" id="reqAnsweredFill" style="width:0%"></div>
+  </div>
+
+  <!-- Still Need -->
+  <div class="ma-label-row" style="margin-top:10px;">
+    <span class="ma-label">Employee that need to answer:</span>
+    <span class="ma-value"><span id="stillNeedNum">0</span> / 50</span>
+  </div>
+  <div class="ma-progress" role="progressbar" aria-valuemin="0" aria-valuemax="50" aria-valuenow="0">
+    <div class="ma-progress-fill" id="stillNeedFill" style="width:0%"></div>
+  </div>
+
+  <!-- Total Activity -->
+  <div class="ma-label-row" style="margin-top:10px;">
+    <span class="ma-label">Total activity:</span>
+    <span class="ma-value" id="totalActivityNum">0</span>
+  </div>
+</div>
+
+<div class="ma-progress" role="progressbar"
+     aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"
+     aria-label="Admin Questions Completion">
+  <div class="ma-progress-fill" id="maCompletionFill" style="width:0%"></div>
+</div>
+
+  <div class="ma-block ma-top-concern">
+    <div class="ma-label-row">
+      <span class="ma-label">Top Concern:</span>
+      <span class="ma-top-pill" id="maTopConcern">1:1</span>
+      <span class="ma-top-sub" id="maTopConcernCount">24</span>
+      <span class="ma-icons" aria-hidden="true">
+        <span class="ma-icon ma-flag">🚩</span>
+        <span class="ma-icon ma-thumb">👎</span>
+      </span>
+    </div>
+  </div>
+
+  <div class="ma-block">
+    <div class="ma-subtitle">Trending Employee Topics</div>
+
+    <ul class="ma-topics" id="maTopicsList">
+      <!-- populated by JS -->
+    </ul>
+
+  </div>
+</section>
+
+<hr />
+
+<h2>Employee Ideas</h2>
+
+<div style="max-width: 700px;">
+    <label><b>Submit a suggestion</b></label><br />
+    <textarea id="suggestionText" rows="4" style="width:100%;"></textarea><br />
+    <button id="btnSubmitSuggestion">Submit</button>
+    <p id="suggestionMsg" style="color:red;"></p>
+</div>
+
+<!-- Temp Question Card carousel -->
+
+<!-- Begining of req and optional -->
+
+<div id="surveyCarousel">
+  <div id="progressText"></div>
+
+  <div id="questionCard" class="card">
+    
+  </div>
+
+  <div class="nav">
+    <button id="voteLeftBtn" type="button">Vote Left</button>
+    <button id="voteRightBtn" type="button">Vote Right</button>
+  </div>
+
+  <div id="errorMsg" class="error" style="display:none;"></div>
+</div>
+
+<h3>Recent Suggestions</h3>
+<div id="suggestionsList"></div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+<script>
+
+    function apiUrl(method) {
+        return "/ProjectServices.asmx/" + method;
+    }
+
+    function escapeHtml(text) {
+        return String(text)
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#039;");
+    }
+
+    function redirectToLogin() {
+        window.location.href = "login.html";
+    }
+
+    function showAccessDenied() {
+      document.body.innerHTML = "<h1>Access Denied</h1>";
+    }
+
+    function checkAccessAndInit() {
+      $.ajax({
+        type: "POST",
+        url: apiUrl("GetAccessStatus"),
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        success: function (res) {
+          if (!res || !res.d) {
+            redirectToLogin();
+            return;
+          }
+
+          const access = res.d;
+
+          if (!access.loggedIn) {
+            redirectToLogin();
+            return;
+          }
+
+          if (!access.verified) {
+            showAccessDenied();
+            return;
+          }
+
+          loadSuggestions();
+          loadDashboard();
+          setInterval(loadDashboard, 5000);
+
+          if (window.initVotingUI) {
+            window.initVotingUI();
+          }
+        },
+        error: function () {
+          redirectToLogin();
+        }
+      });
+    }
+
+    function loadSuggestions() {
+        $.ajax({
+            type: "POST",
+            url: apiUrl("GetSuggestions"),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (res) {
+
+                if (!res.d) {
+                    redirectToLogin();
+                    return;
+                }
+
+                const rows = res.d;
+
+                if (rows.length === 0) {
+                    $("#suggestionsList").html("<p>No suggestions yet.</p>");
+                    return;
+                }
+
+                let html = "";
+
+                rows.forEach(s => {
+                    html += `
+                        <div class="card">
+                            <div class="date">${s.CreatedDate}</div>
+                            <div style="margin:8px 0;">
+                                ${escapeHtml(s.SuggestionText)}
+                            </div>
+                            <button onclick="vote(${s.SuggestionID}, true)">
+                                👍 ${s.UpVotes}
+                            </button>
+                            <button onclick="vote(${s.SuggestionID}, false)">
+                                👎 ${s.DownVotes}
+                            </button>
+                        </div>
+                    `;
+                });
+
+                $("#suggestionsList").html(html);
+            },
+            error: function () {
+                $("#suggestionsList").html("<p>Error loading suggestions.</p>");
+            }
+        });
+    }
+
+    function vote(id, isUp) {
+        $.ajax({
+            type: "POST",
+            url: apiUrl("VoteSuggestion"),
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify({
+                suggestionId: id,
+                isUpvote: isUp
+            }),
+            dataType: "json",
+            success: function (res) {
+
+                if (!res.d.success) {
+                    if (res.d.message.includes("logged")) {
+                        redirectToLogin();
+                        return;
+                    }
+                    alert(res.d.message);
+                    return;
+                }
+
+                loadSuggestions();
+            },
+            error: function () {
+                alert("Vote failed.");
+            }
+        });
+    }
+
+    $(document).ready(function () {
+
+        $("#btnSubmitSuggestion").click(function () {
+
+            const text = $("#suggestionText").val().trim();
+
+            if (!text) {
+                $("#suggestionMsg").text("Suggestion cannot be empty.");
+                return;
+            }
+
+            $.ajax({
+                type: "POST",
+                url: apiUrl("AddSuggestion"),
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({
+                    suggestionText: text
+                }),
+                dataType: "json",
+                success: function (res) {
+
+                    if (!res.d.success) {
+
+                        if (res.d.message.includes("logged")) {
+                            redirectToLogin();
+                            return;
+                        }
+
+                        $("#suggestionMsg").text(res.d.message);
+                        return;
+                    }
+
+                    $("#suggestionMsg").css("color", "green");
+                    $("#suggestionMsg").text("Suggestion submitted.");
+                    $("#suggestionText").val("");
+                    loadSuggestions();
+                },
+                error: function () {
+                    $("#suggestionMsg").text("Submit failed.");
+                }
+            });
+        });
+
+        checkAccessAndInit();
+    });
+
+    // Dashboard Updating logic 
+function loadDashboard() {
+  $.ajax({
+    type: "POST",
+    url: "ProjectServices.asmx/GetDashboardStats", 
+    data: "{}", 
+    contentType: "application/json; charset=utf-8",
+    dataType: "json",
+    success: function (msg) {
+      var data = msg.d; 
+      renderManagerAnalytics(data);
+    },
+    error: function (xhr) {
+      console.log("Dashboard load failed:", xhr.status, xhr.responseText);
+    }
+  });
+}
+
+function renderManagerAnalytics(data){
+  
+  const workforce = 50;
+
+const requiredAnswered = Number(data.requiredAnswered) || 0;
+const stillNeed = Math.max(0, workforce - requiredAnswered);
+const totalActivity = Number(data.totalActivity) || 0;
+
+document.getElementById("reqAnsweredNum").textContent = requiredAnswered;
+document.getElementById("stillNeedNum").textContent = stillNeed;
+document.getElementById("totalActivityNum").textContent = totalActivity;
+
+const reqPct = Math.max(0, Math.min(100, (requiredAnswered / workforce) * 100));
+const needPct = Math.max(0, Math.min(100, (stillNeed / workforce) * 100));
+
+document.getElementById("reqAnsweredFill").style.width = `${reqPct}%`;
+document.getElementById("stillNeedFill").style.width = `${needPct}%`;
+  
+  const pct = Math.max(0, Math.min(100, Number(data.completionPercent) || 0));
+
+  const textEl = document.getElementById("maCompletionText");
+  textEl.textContent = `${pct}%`;
+  textEl.style.display = "inline";
+
+  const fillEl = document.getElementById("maCompletionFill");
+  fillEl.style.width = `${pct}%`;
+  fillEl.parentElement.setAttribute("aria-valuenow", String(pct));
+
+  document.getElementById("maTopConcern").textContent = data.topConcern?.label ?? "—";
+  document.getElementById("maTopConcernCount").textContent = data.topConcern?.count ?? "";
+
+  const list = document.getElementById("maTopicsList");
+  list.innerHTML = "";
+
+  (data.topics || []).forEach(t => {
+    const item = document.createElement("li");
+    item.className = "ma-topic";
+
+    const icon = document.createElement("div");
+    icon.className = "ma-topic-icon";
+    icon.textContent = t.icon || "•";
+
+    const name = document.createElement("div");
+    name.className = "ma-topic-name";
+    name.textContent = t.name || "—";
+
+    const barWrap = document.createElement("div");
+    barWrap.className = "ma-mini-bar";
+
+    const barFill = document.createElement("div");
+    barFill.className = "ma-mini-fill";
+    barFill.style.background = t.color || "#2f7fe0";
+
+    const topicPct = Math.max(0, Math.min(100, Number(t.pct) || 0));
+    barFill.style.width = `${topicPct}%`;
+
+    barWrap.appendChild(barFill);
+
+    const pctEl = document.createElement("div");
+    pctEl.className = "ma-topic-pct";
+    pctEl.textContent = `${topicPct}%`;
+
+    item.append(icon, name, barWrap, pctEl);
+    list.appendChild(item);
+  });
+}
+
+// Beginning of req and optional 
+$("form").submit(function(e) {
+    let valid = true;
+
+    $(".required-input").each(function() {
+        if ($(this).val().trim() === "") {
+            valid = false;
+        }
+    });
+
+    if (!valid) {
+        alert("Please answer all required questions.");
+        e.preventDefault();
+    }
+});
+
+</script>
+
+<script src="voting.js"></script>
+
+</body>
+</html>
