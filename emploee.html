@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Employee Questions</title>
+
+  <style>
+    :root{
+      --bg:#0b0f19;
+      --panel:#111827;
+      --panel2:#0b1220;
+      --border:#2b364a;
+      --text:#ffffff;
+      --muted:#b7c0d1;
+      --blue:#60a5fa;
+      --red:#ef4444;
+      --amber:#f59e0b;
+      --green:#22c55e;
+      --slate:#334155;
+    }
+
+    body{
+      background:var(--bg);
+      color:var(--text);
+      font-family: Arial, sans-serif;
+      margin:0;
+    }
+
+    /* Top nav */
+    .topbar{
+      position: sticky;
+      top:0;
+      z-index: 5;
+      background: linear-gradient(180deg, rgba(17,24,39,0.95), rgba(11,15,25,0.95));
+      border-bottom:1px solid var(--border);
+      backdrop-filter: blur(8px);
+    }
+    .topbarInner{
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 14px 16px;
+      display:flex;
+      align-items:center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      font-weight: bold;
+      letter-spacing: .2px;
+    }
+    .logoDot{
+      width:28px;
+      height:28px;
+      border-radius: 8px;
+      background: radial-gradient(circle at 30% 30%, #93c5fd, #2563eb);
+      box-shadow: 0 10px 30px rgba(96,165,250,0.25);
+    }
+    .navLinks{
+      display:flex;
+      gap:16px;
+      color: var(--muted);
+      font-size: 14px;
+      flex-wrap: wrap;
+    }
+    .navLinks a{
+      color: var(--muted);
+      text-decoration:none;
+      padding: 6px 10px;
+      border-radius: 10px;
+      border: 1px solid transparent;
+    }
+    .navLinks a.active{
+      color: var(--text);
+      background: rgba(96,165,250,0.12);
+      border: 1px solid rgba(96,165,250,0.25);
+    }
+
+    /* Page */
+    .container{
+      max-width: 900px;
+      margin: 26px auto;
+      padding: 0 16px;
+    }
+    h1{
+      margin: 0 0 10px 0;
+      font-size: 32px;
+    }
+    .subtext{
+      margin: 0 0 18px 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    .card{
+      background: linear-gradient(180deg, rgba(17,24,39,1), rgba(11,18,32,1));
+      border:1px solid var(--border);
+      border-radius: 18px;
+      padding: 16px;
+      box-shadow: 0 16px 50px rgba(0,0,0,0.28);
+      margin-bottom: 14px;
+    }
+
+    .cardHeader{
+      display:flex;
+      align-items:flex-start;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .cardTitle{
+      font-size: 18px;
+      font-weight:bold;
+      margin:0;
+    }
+
+    .pill{
+      font-size:12px;
+      color: var(--muted);
+      border:1px solid var(--border);
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.03);
+      white-space: nowrap;
+    }
+
+    .promptText{
+      font-size: 18px;
+      line-height: 1.35;
+      margin: 0;
+    }
+    .meta{
+      margin-top: 8px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    /* Buttons */
+    .btnRow{
+      display:flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+    button{
+      border:none;
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-weight:bold;
+      cursor:pointer;
+      white-space: nowrap;
+    }
+    .btnAgree{ background: var(--green); color:#0b0f19; }
+    .btnNeeds{ background: var(--amber); color:#0b0f19; }
+    .btnBad{ background: var(--red); color:#0b0f19; }
+    .btnSkip{ background: var(--slate); color:#fff; border:1px solid var(--border); }
+
+    /* Optional feedback */
+    .feedbackBox{
+      margin-top: 14px;
+      padding: 12px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.03);
+      display:none;
+    }
+    textarea{
+      width:100%;
+      min-height:90px;
+      border-radius:12px;
+      border:1px solid var(--border);
+      background:#0b0f19;
+      color:#fff;
+      padding:10px;
+      resize: vertical;
+    }
+    .feedbackTop{
+      display:flex;
+      align-items:center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+    }
+    .small{
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .toast{
+      margin-top:10px;
+      display:none;
+      background: rgba(34,197,94,0.12);
+      border:1px solid rgba(34,197,94,0.25);
+      padding:10px;
+      border-radius:12px;
+      color: var(--text);
+      font-size: 13px;
+    }
+
+    .empty{
+      padding: 12px;
+      border:1px dashed var(--border);
+      border-radius: 14px;
+      color: var(--muted);
+      font-size: 13px;
+      background: rgba(255,255,255,0.02);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="topbar">
+    <div class="topbarInner">
+      <div class="brand">
+        <div class="logoDot"></div>
+        <div>Employee Feedback</div>
+      </div>
+
+      <div class="navLinks">
+        <a href="#">Admin</a>
+        <a class="active" href="#">Employee</a>
+        <a href="#">Submit Idea</a>
+        <a href="#">Help</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <h1>Employee Questions</h1>
+    <p class="subtext">
+      Quick swipes help improve the workplace. Optional written feedback is available when a swipe alone isn’t enough.
+    </p>
+
+    <!-- Anonymity explanation (Acceptance Criteria: shown before/during submission) -->
+    <div class="card">
+      <div class="cardHeader">
+        <p class="cardTitle">Your anonymity is protected</p>
+        <span class="pill">Anonymous + verified access</span>
+      </div>
+      <p class="subtext" style="margin:0;">
+        You log in so only verified employees can participate. Your name and employee ID are not stored with your responses.
+        Feedback is saved using a random identifier, so managers can’t trace comments back to you.
+      </p>
+    </div>
+
+    <!-- Prompt card -->
+    <div class="card" id="promptCard">
+      <div class="cardHeader">
+        <p class="cardTitle">Question</p>
+        <span class="pill" id="progressPill">Active</span>
+      </div>
+
+      <p class="promptText" id="promptText">Loading...</p>
+      <div class="meta" id="promptMeta"></div>
+
+      <div class="btnRow">
+        <button class="btnBad" onclick="vote('negative_impact')">Disagree</button>
+        <button class="btnNeeds" onclick="vote('needs_improvement')">Needs Improvement</button>
+        <button class="btnAgree" onclick="vote('agree')">Agree</button>
+        <button class="btnSkip" onclick="nextPrompt()">Skip</button>
+      </div>
+
+      <!-- Optional written feedback (Acceptance Criteria) -->
+      <div class="feedbackBox" id="feedbackBox">
+        <div class="feedbackTop">
+          <b>Optional written feedback</b>
+          <span class="small" id="charCount">0 / 250</span>
+        </div>
+        <p class="small" style="margin-top:0;">
+          This is optional. Keep it constructive. (Max 250 characters)
+        </p>
+        <textarea id="feedbackText" maxlength="250" placeholder="Share a suggestion or quick idea..."></textarea>
+
+        <div class="btnRow" style="margin-top:10px;">
+          <button class="btnAgree" onclick="submitFeedback()">Submit</button>
+          <button class="btnSkip" onclick="skipFeedback()">Skip</button>
+        </div>
+
+        <div class="toast" id="toast">Saved. Thanks for the feedback.</div>
+
+        <div class="small" style="margin-top:10px;">
+          Linked to Prompt ID: <span id="linkedPromptId"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" id="doneCard" style="display:none;">
+      <div class="cardHeader">
+        <p class="cardTitle">All set</p>
+        <span class="pill">No active prompts</span>
+      </div>
+      <div class="empty">
+        There are currently no active prompts. Check back later.
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ======================
+    // Keys
+    // ======================
+    const PROMPTS_KEY = "swipe_prompts";
+    const RESPONSES_KEY = "swipe_responses";
+
+    // ======================
+    // Seed prompts if missing (so employee flow always has data)
+    // (This supports your retire-prompt story + prevents blank UI)
+    // ======================
+    if (!localStorage.getItem(PROMPTS_KEY)) {
+      localStorage.setItem(PROMPTS_KEY, JSON.stringify([
+        { id: 1, text: "The tools I use are up to date for my job.", status: "active", count: 0, threshold: 5 },
+        { id: 2, text: "Team communication is clear and consistent.", status: "active", count: 0, threshold: 5 },
+        { id: 3, text: "Meetings are productive and action-oriented.", status: "active", count: 0, threshold: 5 }
+      ]));
+    }
+
+    let prompts = JSON.parse(localStorage.getItem(PROMPTS_KEY));
+    let responses = JSON.parse(localStorage.getItem(RESPONSES_KEY) || "[]");
+
+    // Random anon identifier (demo-friendly)
+    const anonId = "anon-" + Math.floor(Math.random() * 100000);
+
+    let index = 0;
+    let current = null;
+
+    const promptTextEl = document.getElementById("promptText");
+    const promptMetaEl = document.getElementById("promptMeta");
+    const progressPillEl = document.getElementById("progressPill");
+
+    const feedbackBoxEl = document.getElementById("feedbackBox");
+    const feedbackTextEl = document.getElementById("feedbackText");
+    const charCountEl = document.getElementById("charCount");
+    const toastEl = document.getElementById("toast");
+    const linkedPromptIdEl = document.getElementById("linkedPromptId");
+
+    const promptCardEl = document.getElementById("promptCard");
+    const doneCardEl = document.getElementById("doneCard");
+
+    function refreshLocal() {
+      prompts = JSON.parse(localStorage.getItem(PROMPTS_KEY) || "[]");
+      responses = JSON.parse(localStorage.getItem(RESPONSES_KEY) || "[]");
+    }
+
+    function getActivePrompts() {
+      return prompts.filter(p => p.status === "active");
+    }
+
+    function loadPrompt() {
+      refreshLocal();
+      const active = getActivePrompts();
+
+      // Hide feedback box each load
+      feedbackBoxEl.style.display = "none";
+      toastEl.style.display = "none";
+      feedbackTextEl.value = "";
+      charCountEl.textContent = "0 / 250";
+
+      if (active.length === 0) {
+        promptCardEl.style.display = "none";
+        doneCardEl.style.display = "block";
+        return;
+      }
+
+      if (index >= active.length) index = 0;
+      current = active[index];
+
+      promptTextEl.textContent = current.text;
+      progressPillEl.textContent = "Active";
+      promptMetaEl.textContent = `Prompt ID: ${current.id} • Responses so far: ${current.count} • Auto-retire at: ${current.threshold}`;
+    }
+
+    loadPrompt();
+
+    function vote(type) {
+      if (!current) return;
+
+      // Store vote anonymously + link to prompt
+      responses.push({
+        promptId: current.id,
+        vote: type,
+        anon: anonId,
+        text: null
+      });
+
+      localStorage.setItem(RESPONSES_KEY, JSON.stringify(responses));
+
+      // Increment response count + auto-retire at threshold
+      prompts = prompts.map(p => {
+        if (p.id === current.id) {
+          p.count++;
+          if (p.count >= p.threshold) p.status = "retired";
+        }
+        return p;
+      });
+
+      localStorage.setItem(PROMPTS_KEY, JSON.stringify(prompts));
+
+      // Optional written feedback shown after needs improvement / negative impact
+      if (type === "needs_improvement" || type === "negative_impact") {
+        feedbackBoxEl.style.display = "block";
+        linkedPromptIdEl.textContent = current.id;
+      } else {
+        nextPrompt();
+      }
+    }
+
+    function submitFeedback() {
+      if (!current) return;
+
+      const text = feedbackTextEl.value.trim();
+
+      // Attach written feedback to the most recent response for THIS prompt from THIS anon user
+      for (let i = responses.length - 1; i >= 0; i--) {
+        if (responses[i].promptId === current.id && responses[i].anon === anonId && responses[i].text === null) {
+          responses[i].text = text; // can be empty; still optional
+          break;
+        }
+      }
+
+      localStorage.setItem(RESPONSES_KEY, JSON.stringify(responses));
+      toastEl.style.display = "block";
+
+      // move to next prompt quickly
+      setTimeout(() => {
+        nextPrompt();
+      }, 650);
+    }
+
+    function skipFeedback() {
+      // Acceptance Criteria: skippable
+      nextPrompt();
+    }
+
+    function nextPrompt() {
+      index++;
+      loadPrompt();
+    }
+
+    feedbackTextEl.addEventListener("input", () => {
+      charCountEl.textContent = `${feedbackTextEl.value.length} / 250`;
+    });
+  </script>
+</body>
+</html>
