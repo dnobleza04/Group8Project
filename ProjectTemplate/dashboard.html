@@ -26,165 +26,6 @@
             border: none;
         }
 
-         /* Dashboard Card */
-  .manager-analytics{
-    background:#fff;
-    border:1px solid #e6eaf2;
-    border-radius:14px;
-    padding:16px 16px 14px;
-    box-shadow:0 6px 20px rgba(18,38,63,.06);
-    font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-    color:#14223a;
-    max-width:420px;
-  }
-
-  .ma-title{
-    margin:0 0 10px;
-    font-size:18px;
-    font-weight:700;
-  }
-
-  .ma-block{ margin-top:12px; }
-
-  .ma-label-row{
-    display:flex;
-    align-items:center;
-    gap:8px;
-    flex-wrap:wrap;
-  }
-
-  .ma-label{
-    font-size:14px;
-    font-weight:600;
-    color:#1c2e4a;
-  }
-
-  .ma-value{
-    margin-left:auto;
-    font-size:14px;
-    font-weight:700;
-    color:#1c2e4a;
-  }
-
- /* completion progress */
-  .ma-progress{
-    margin-top:8px;
-    height:10px;
-    background:#eef2f7;
-    border-radius:999px;
-    overflow:hidden;
-  }
-  .ma-progress-fill{
-    height:100%;
-    background:#2fbf71; /* green */
-    border-radius:999px;
-    width:0%;
-    transition:width .35s ease;
-  }
-
-    /* Top concern row */
-  .ma-top-concern .ma-value{ display:none; }
-
-  .ma-top-pill{
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    padding:3px 10px;
-    border-radius:999px;
-    background:#f1f4f9;
-    border:1px solid #e6eaf2;
-    font-weight:700;
-    font-size:12px;
-    color:#1c2e4a;
-  }
-
-  .ma-top-sub{
-    font-size:12px;
-    color:#6b7a90;
-    font-weight:700;
-  }
-
-  .ma-icons{
-    margin-left:auto;
-    display:flex;
-    gap:6px;
-    opacity:.85;
-  }
-  .ma-icon{
-    font-size:14px;
-    line-height:1;
-  }
-
- /* //bars for analytics  */
-  .ma-subtitle{
-    font-size:14px;
-    font-weight:700;
-    color:#1c2e4a;
-    margin-bottom:8px;
-  }
-
-  .ma-topics{
-    list-style:none;
-    padding:0;
-    margin:0;
-    display:flex;
-    flex-direction:column;
-    gap:10px;
-  }
-
-  .ma-topic{
-    display:grid;
-    grid-template-columns: 22px 1fr 110px 42px;
-    align-items:center;
-    gap:10px;
-  }
-
-  .ma-topic-icon{
-    width:22px; height:22px;
-    display:grid; place-items:center;
-    background:#f5f7fb;
-    border:1px solid #e6eaf2;
-    border-radius:6px;
-    font-size:13px;
-  }
-
-  .ma-topic-name{
-    font-size:13px;
-    font-weight:600;
-    color:#2a3b57;
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
-  }
-
-  .ma-mini-bar{
-    height:10px;
-    background:#eef2f7;
-    border-radius:999px;
-    overflow:hidden;
-    position:relative;
-  }
-
-  .ma-mini-fill{
-    height:100%;
-    width:0%;
-    border-radius:999px;
-    transition:width .35s ease;
-  }
-
-  .ma-topic-pct{
-    text-align:right;
-    font-size:13px;
-    font-weight:700;
-    color:#2a3b57;
-  }
-
-  .ma-footnote{
-    margin:12px 0 0;
-    font-size:12px;
-    color:#6b7a90;
-    line-height:1.35;
-  }
 
   /* Begining of req and optional */
   .required {
@@ -259,6 +100,398 @@
   font-size: 13px;
 }
 
+/* NEW */
+
+/* Filter CSS */
+
+/* Filter row */
+.filterRow{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
+#statusFilter{
+  min-width: 220px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1.5px solid var(--border);
+  background: #fff;
+  font-weight: 800;
+}
+
+.saveStatusBtn{
+  padding: 11px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(79,70,229,0.20);
+  background: rgba(79,70,229,0.08);
+  color: var(--primary);
+  font-weight: 900;
+}
+
+.saveStatusBtn:hover{
+  background: rgba(79,70,229,0.12);
+}
+
+.statusMsg{
+  color: var(--muted);
+  font-weight: 700;
+  font-size: 13px;
+}
+
+/*  Suggestions list layout  */
+#suggestionsList{
+  margin-top: 10px;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--surface);
+  box-shadow: var(--shadow2);
+}
+
+/* suggestionsList container */
+.suggestions{
+  margin-top: 14px;
+  display: grid;
+  gap: 12px;
+}
+
+/* Suggestion card */
+.suggestion-card{
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: #fff;
+  padding: 14px 14px;
+  box-shadow: 0 10px 18px rgba(15,23,42,0.06);
+  transition: 0.2s ease;
+}
+
+.suggestion-card:hover{
+  transform: translateY(-1px);
+  box-shadow: 0 14px 26px rgba(15,23,42,0.10);
+}
+
+/* status */
+.suggestion-head{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.suggestion-meta{
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.suggestion-title{
+  font-weight: 900;
+  font-size: 14px;
+  color: var(--text);
+}
+
+.suggestion-sub{
+  font-size: 12.5px;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+/* Main text */
+.suggestion-body{
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+/* Status pill */
+.suggestion-status{
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 900;
+  border: 1px solid var(--border);
+  background: rgba(15,23,42,0.04);
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+/* Color-coded statuses */
+.suggestion-status[data-status="Under Review"]{
+  background: rgba(37,99,235,0.10);
+  border-color: rgba(37,99,235,0.22);
+  color: #1d4ed8;
+}
+.suggestion-status[data-status="Planned"]{
+  background: rgba(245,158,11,0.14);
+  border-color: rgba(245,158,11,0.25);
+  color: #92400e;
+}
+.suggestion-status[data-status="Implemented"]{
+  background: rgba(22,163,74,0.12);
+  border-color: rgba(22,163,74,0.22);
+  color: #166534;
+}
+
+/* buttons per suggestion */
+.suggestion-actions{
+  margin-top: 12px;
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.suggestion-actions button{
+  padding: 9px 12px;
+  border-radius: 12px;
+  font-weight: 900;
+}
+
+/* NEW */
+
+/* EMPLOYEE PORTAL THEME */
+
+* { box-sizing: border-box; }
+
+:root{
+  --bg1:#f6f8fc;
+  --bg2:#eef2ff;
+  --surface:#ffffff;
+  --text:#0f172a;
+  --muted:#64748b;
+  --border:#e2e8f0;
+
+  --primary:#4f46e5;     
+  --primary2:#2563eb;  
+  --danger:#dc2626;
+  --shadow: 0 18px 45px rgba(15, 23, 42, 0.10);
+  --shadow2: 0 10px 22px rgba(15, 23, 42, 0.08);
+}
+
+body{
+  margin: 0;
+  min-height: 100vh;
+  font-family: "Segoe UI", Roboto, Arial, sans-serif;
+  color: var(--text);
+
+  background:
+    radial-gradient(1100px 600px at 15% 15%, var(--bg2), transparent 60%),
+    radial-gradient(900px 500px at 85% 25%, #e0f2fe, transparent 55%),
+    linear-gradient(180deg, var(--bg1), #ffffff);
+
+  /* spacing around the page */
+  padding: 28px 20px 70px;
+}
+
+/* alignement */
+body > h1,
+body > p,
+body > hr,
+body > h2,
+body > h3,
+body > #surveyCarousel,
+body > #suggestionsList{
+  max-width: 1120px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Headings */
+h1{
+  margin: 0 0 8px;
+  font-size: 44px;
+  font-weight: 800;
+  letter-spacing: -0.6px;
+}
+
+p{
+  margin: 0 0 18px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+hr{
+  border: none;
+  height: 1px;
+  background: var(--border);
+  margin: 18px auto 22px;
+}
+
+/* Section headings */
+h2{
+  margin: 18px 0 12px;
+  font-size: 26px;
+  letter-spacing: -0.3px;
+}
+
+h3{
+  margin: 34px 0 10px;
+  font-size: 18px;
+  color: var(--muted);
+  font-weight: 800;
+  text-transform: none;
+}
+
+/* Survey Carousel */
+#surveyCarousel{
+  margin-top: 10px;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: rgba(255,255,255,0.75);
+  backdrop-filter: blur(8px);
+  box-shadow: var(--shadow2);
+}
+
+/* Progress text */
+#progressText{
+  color: var(--muted);
+  font-weight: 800;
+  font-size: 13px;
+  margin: 0 0 10px;
+}
+
+/* question card */
+#questionCard.card{
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: 0 10px 18px rgba(15,23,42,0.06);
+  padding: 18px;
+  min-height: 160px;
+}
+
+/* Inputs match vibe */
+#questionCard input,
+#questionCard select,
+#questionCard textarea{
+  width: 100%;
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-size: 14px;
+  background: rgba(255,255,255,0.95);
+  transition: 0.2s ease;
+}
+
+#questionCard input:focus,
+#questionCard select:focus,
+#questionCard textarea:focus{
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(79,70,229,0.15);
+}
+
+/* Carousel buttons alignement */
+#surveyCarousel .nav{
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+/* Buttons cool */
+button{
+  border: 1px solid transparent;
+  border-radius: 12px;
+  padding: 11px 14px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: 0.2s ease;
+  background: #fff;
+  color: var(--text);
+}
+
+button:hover{
+  transform: translateY(-1px);
+  box-shadow: 0 10px 18px rgba(15,23,42,0.10);
+}
+
+/*  Next/Submit */
+#nextBtn, #submitBtn, #btnSubmitSuggestion{
+  color: #fff;
+  background: linear-gradient(135deg, var(--primary), var(--primary2));
+  box-shadow: 0 12px 22px rgba(79,70,229,0.18);
+}
+
+#nextBtn:hover, #submitBtn:hover, #btnSubmitSuggestion:hover{
+  box-shadow: 0 16px 30px rgba(79,70,229,0.22);
+}
+
+
+#prevBtn:hover{
+  background: rgba(79,70,229,0.12);
+}
+
+/* Disabled state */
+button:disabled{
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Error message */
+.error, #errorMsg{
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(220,38,38,0.25);
+  background: rgba(220,38,38,0.08);
+  color: var(--danger);
+  font-weight: 700;
+  font-size: 13px;
+}
+
+/* Suggestions Section */
+#suggestionsList{
+  margin-top: 10px;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--surface);
+  box-shadow: var(--shadow2);
+}
+
+/* more alignement */
+#suggestionsList > div[style*="max-width"]{
+  max-width: 760px !important;
+  margin: 0;
+}
+
+/* input styling */
+#suggestionText{
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
+  padding: 12px 14px;
+  font-size: 14px;
+  resize: vertical;
+  transition: 0.2s ease;
+}
+
+#suggestionText:focus{
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(79,70,229,0.15);
+}
+
+/* Suggestion message */
+#suggestionMsg{
+  margin: 10px 0 0;
+  color: var(--danger);
+  font-weight: 700;
+}
+
+.statusMsg{
+  margin-left: 10px;
+  color: var(--muted);
+  font-weight: 700;
+}
+
   </style>
     </style>
     <meta charset="utf-8" />
@@ -275,82 +508,13 @@
 </head>
 <body>
 
-<h1>Welcome to the Dashboard</h1>
+<h1>Welcome to the Portal!</h1>
 <p>You are successfully logged in.</p>
 
 <body>
-
-  <!-- Manager Analytics Dashboard -->
-  <section class="manager-analytics" aria-label="Manager Analytics Dashboard">
-  <h3 class="ma-title">Manager Analytics Dashboard</h3>
-
-  <div class="ma-block">
-    <div class="ma-label-row">
-      <span id="maCompletionText" class="ma-value" style="display:none;"></span>
-    </div>
-
-  <div class="ma-block">
-  <div class="ma-subtitle">Participation</div>
-
-  <!-- Required Answered -->
-  <div class="ma-label-row">
-    <span class="ma-label">Employee Answered (Required):</span>
-    <span class="ma-value"><span id="reqAnsweredNum">0</span> / 50</span>
-  </div>
-  <div class="ma-progress" role="progressbar" aria-valuemin="0" aria-valuemax="50" aria-valuenow="0">
-    <div class="ma-progress-fill" id="reqAnsweredFill" style="width:0%"></div>
-  </div>
-
-  <!-- Still Need -->
-  <div class="ma-label-row" style="margin-top:10px;">
-    <span class="ma-label">Employee that need to answer:</span>
-    <span class="ma-value"><span id="stillNeedNum">0</span> / 50</span>
-  </div>
-  <div class="ma-progress" role="progressbar" aria-valuemin="0" aria-valuemax="50" aria-valuenow="0">
-    <div class="ma-progress-fill" id="stillNeedFill" style="width:0%"></div>
-  </div>
-
-  <!-- Total Activity -->
-  <div class="ma-label-row" style="margin-top:10px;">
-    <span class="ma-label">Total activity:</span>
-    <span class="ma-value" id="totalActivityNum">0</span>
-  </div>
-</div>
-
-<div class="ma-progress" role="progressbar"
-     aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"
-     aria-label="Admin Questions Completion">
-  <div class="ma-progress-fill" id="maCompletionFill" style="width:0%"></div>
-</div>
-
-  <div class="ma-block ma-top-concern">
-    <div class="ma-label-row">
-      <span class="ma-label">Top Concern:</span>
-      <span class="ma-icons" aria-hidden="true">
-      </span>
-    </div>
-  </div>
-
-  <div class="ma-block">
-    <div class="ma-subtitle">Trending Employee Topics</div>
-
-    <ul class="ma-topics" id="maTopicsList">
-      <!-- populated by JS -->
-    </ul>
-
-  </div>
-</section>
-
 <hr />
 
-<h2>Employee Ideas</h2>
-
-<div style="max-width: 700px;">
-    <label><b>Submit a suggestion</b></label><br />
-    <textarea id="suggestionText" rows="4" style="width:100%;"></textarea><br />
-    <button id="btnSubmitSuggestion">Submit</button>
-    <p id="suggestionMsg" style="color:red;"></p>
-</div>
+<h2>Help Us Help You!</h2>
 
 <!-- Temp Question Card carousel -->
 
@@ -372,18 +536,48 @@
   <div id="errorMsg" class="error" style="display:none;"></div>
 </div>
 
-<h3>Recent Suggestions</h3>
+<h3>Employee Ideas</h3>
+
+<h2>Recent Suggestions</h2>
 <div id="suggestionsList">
+
+<div style="max-width: 700px;">
+    <label><b>Submit a suggestion</b></label><br />
+    <textarea id="suggestionText" rows="4" style="width:100%;"></textarea><br />
+    <button id="btnSubmitSuggestion">Submit</button>
+    <p id="suggestionMsg" style="color:red;"></p>
+</div>
   
   <!-- Filter Suggestions -->
-<select id="statusFilter">
-  <option value="All">All</option>
-  <option value="Under Review">Under Review</option>
-  <option value="Planned">Planned</option>
-  <option value="Implemented">Implemented</option>
+<div class="filterRow">
+  <select id="statusFilter">
+    <option value="All">All</option>
+    <option value="Under Review">Under Review</option>
+    <option value="Planned">Planned</option>
+    <option value="Implemented">Implemented</option>
+  </select>
+
+    <div id="suggestionsCards" class="suggestions"></div>
+</div>
+
+<div class="suggestion-card">
+  <div class="suggestion-head">
+    <div class="suggestion-meta">
+      <div class="suggestion-title"></div>
+      <div class="suggestion-sub"></div>
+    </div>
+
+    <span class="suggestion-status" data-status="Under Review"></span>
+  </div>
+
+  <div class="suggestion-body">
+  </div>
+</div>
+
   <button class="saveStatusBtn">Save</button>
-<span class="statusMsg" style="font-size:12px;"></span>
-</select>
+  <span class="statusMsg"></span>
+
+</div>
 
 </div>
 
