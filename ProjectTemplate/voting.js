@@ -2,13 +2,22 @@ let currentVoteQuestion = null;
 let isSubmittingVote = false;
 let dragStartX = null;
 const dragThreshold = 80;
+let pendingConfirmationMessage = "";
 
 function showVoteError(msg) {
+    pendingConfirmationMessage = "";
+    $("#confirmMsg").hide().text("");
     $("#errorMsg").show().text(msg);
 }
 
+function showVoteConfirmation(msg) {
+    pendingConfirmationMessage = msg || "";
+    $("#errorMsg").hide().text("");
+    $("#confirmMsg").show().text(msg);
+}
+
 function setVoteButtonsEnabled(enabled) {
-    $("#voteLeftBtn, #voteRightBtn").prop("disabled", !enabled);
+    $("#voteLeftBtn, #voteRightBtn, #skipBtn").prop("disabled", !enabled);
 }
 
 function renderVoteQuestion() {
@@ -17,6 +26,12 @@ function renderVoteQuestion() {
         $("#questionCard").html("<h3 style='margin:0;'>All caught up.</h3><div class='vote-done-badge'>You have voted on every question</div>");
         setVoteButtonsEnabled(false);
         $("#errorMsg").hide().text("");
+        if (pendingConfirmationMessage) {
+            $("#confirmMsg").show().text(pendingConfirmationMessage);
+            pendingConfirmationMessage = "";
+        } else {
+            $("#confirmMsg").hide().text("");
+        }
         return;
     }
 
@@ -32,6 +47,12 @@ function renderVoteQuestion() {
 
     setVoteButtonsEnabled(true);
     $("#errorMsg").hide().text("");
+    if (pendingConfirmationMessage) {
+        $("#confirmMsg").show().text(pendingConfirmationMessage);
+        pendingConfirmationMessage = "";
+    } else {
+        $("#confirmMsg").hide().text("");
+    }
 }
 
 function loadNextVoteQuestion() {
@@ -98,12 +119,67 @@ function submitQuestionVote(voteRight) {
                 return;
             }
 
+            showVoteConfirmation("Vote recorded.");
             currentVoteQuestion = data.nextQuestion || null;
             renderVoteQuestion();
         },
         error: function () {
             isSubmittingVote = false;
             showVoteError("Vote failed.");
+            setVoteButtonsEnabled(true);
+        }
+    });
+}
+
+function skipCurrentQuestion() {
+    if (!currentVoteQuestion || isSubmittingVote) {
+        return;
+    }
+
+    isSubmittingVote = true;
+    setVoteButtonsEnabled(false);
+
+    $.ajax({
+        type: "POST",
+        url: apiUrl("SkipQuestion"),
+        contentType: "application/json; charset=utf-8",
+        data: JSON.stringify({
+            questionId: currentVoteQuestion.QuestionID
+        }),
+        dataType: "json",
+        success: function (res) {
+            isSubmittingVote = false;
+
+            if (!res || !res.d) {
+                showVoteError("Skip failed.");
+                setVoteButtonsEnabled(true);
+                return;
+            }
+
+            const data = res.d;
+
+            if (!data.success) {
+                if ((data.message || "") === "Access Denied") {
+                    showAccessDenied();
+                    return;
+                }
+                if ((data.message || "").includes("logged")) {
+                    redirectToLogin();
+                    return;
+                }
+
+                showVoteError(data.message || "Skip failed.");
+                setVoteButtonsEnabled(true);
+                return;
+            }
+
+            showVoteConfirmation("Question skipped.");
+            currentVoteQuestion = data.nextQuestion || null;
+            renderVoteQuestion();
+        },
+        error: function () {
+            isSubmittingVote = false;
+            showVoteError("Skip failed.");
             setVoteButtonsEnabled(true);
         }
     });
@@ -158,6 +234,7 @@ function bindSwipeVoting() {
 function initVotingUI() {
     $("#voteLeftBtn").on("click", function () { submitQuestionVote(false); });
     $("#voteRightBtn").on("click", function () { submitQuestionVote(true); });
+    $("#skipBtn").on("click", function () { skipCurrentQuestion(); });
 
     bindSwipeVoting();
     loadNextVoteQuestion();

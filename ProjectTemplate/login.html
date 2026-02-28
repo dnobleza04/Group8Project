@@ -43,6 +43,31 @@ function apiUrl(method) {
     return "/ProjectServices.asmx/" + method;
 }
 
+function checkExistingSession() {
+    $.ajax({
+        type: "POST",
+        url: apiUrl("GetAccessStatus"),
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        success: function (res) {
+            if (!res || !res.d) {
+                return;
+            }
+
+            const access = res.d;
+
+            if (access.loggedIn && access.verified) {
+                window.location.href = "dashboard.html";
+                return;
+            }
+
+            if (access.loggedIn && !access.verified) {
+                $("#msg").text("Access Denied");
+            }
+        }
+    });
+}
+
 function doLogin() {
 
     $("#msg").text("");
@@ -90,6 +115,8 @@ function doLogin() {
 }
 
 $(document).ready(function () {
+
+    checkExistingSession();
 
     // Enter key on either field
     $("#email, #password").keypress(function (e) {

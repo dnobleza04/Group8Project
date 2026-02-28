@@ -259,6 +259,12 @@
   font-size: 13px;
 }
 
+.confirm {
+  margin-top: 10px;
+  color: #1b7d35;
+  font-size: 13px;
+}
+
 .vote-done-badge {
   display: inline-block;
   padding: 4px 10px;
@@ -288,6 +294,7 @@
 
 <h1>Welcome to the Dashboard</h1>
 <p>You are successfully logged in.</p>
+<button id="btnLogout" type="button">Logout</button>
 
 <body>
   <!-- Manager Analytics Dashboard -->
@@ -381,9 +388,11 @@
   <div class="nav">
     <button id="voteLeftBtn" type="button">Vote Left</button>
     <button id="voteRightBtn" type="button">Vote Right</button>
+    <button id="skipBtn" type="button">Skip</button>
   </div>
 
   <div id="errorMsg" class="error" style="display:none;"></div>
+  <div id="confirmMsg" class="confirm" style="display:none;"></div>
 </div>
 
 <h3>Recent Suggestions</h3>
@@ -408,6 +417,18 @@
 
     function redirectToLogin() {
         window.location.href = "login.html";
+    }
+
+    function doLogout() {
+      $.ajax({
+        type: "POST",
+        url: apiUrl("Logout"),
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        complete: function () {
+          redirectToLogin();
+        }
+      });
     }
 
     function showAccessDenied() {
@@ -529,6 +550,10 @@
     }
 
     $(document).ready(function () {
+
+      $("#btnLogout").click(function () {
+        doLogout();
+      });
 
         $("#btnSubmitSuggestion").click(function () {
 

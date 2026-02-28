@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Web.Services;
 using System.Web.Script.Services;
 using MySql.Data.MySqlClient;
@@ -83,6 +84,16 @@ namespace ProjectTemplate
 		private bool IsVerifiedSession()
 		{
 			return IsLoggedInSession() && Session["verified"] != null && (bool)Session["verified"];
+		}
+
+		private HashSet<int> GetSkippedQuestionIdsSession()
+		{
+			if (Session["skippedQuestionIds"] == null)
+			{
+				Session["skippedQuestionIds"] = new HashSet<int>();
+			}
+
+			return (HashSet<int>)Session["skippedQuestionIds"];
 		}
 
 		[WebMethod(EnableSession = true)]
@@ -243,6 +254,13 @@ namespace ProjectTemplate
 
 		[WebMethod(EnableSession = true)]
 		[ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+		public BasicResult SubmitAnonymousFeedback(string feedbackText)
+		{
+			return AddSuggestion(feedbackText);
+		}
+
+		[WebMethod(EnableSession = true)]
+		[ScriptMethod(ResponseFormat = ResponseFormat.Json)]
 		public List<SuggestionRow> GetSuggestions()
 		{
 			List<SuggestionRow> rows = new List<SuggestionRow>();
@@ -288,7 +306,7 @@ namespace ProjectTemplate
 			return rows;
 		}
 
-		private VoteQuestionRow GetNextVoteQuestionForAnon(string anonId)
+		private VoteQuestionRow GetNextVoteQuestionForAnon(string anonId, HashSet<int> skippedIds = null)
 		{
 			string sql = @"
 				SELECT
@@ -304,14 +322,31 @@ namespace ProjectTemplate
 					WHERE sv.SuggestionID = s.SuggestionID
 					  AND sv.AnonID = @anonId
 				)
-				ORDER BY s.CreatedDate DESC
-				LIMIT 1;
 			";
+
+			if (skippedIds != null && skippedIds.Count > 0)
+			{
+				string[] skipParams = skippedIds.Select((id, i) => "@skip" + i).ToArray();
+				sql += " AND s.SuggestionID NOT IN (" + string.Join(",", skipParams) + ")";
+			}
+
+			sql += " ORDER BY s.CreatedDate DESC LIMIT 1;";
 
 			using (MySqlConnection con = new MySqlConnection(getConString()))
 			using (MySqlCommand cmd = new MySqlCommand(sql, con))
 			{
 				cmd.Parameters.AddWithValue("@anonId", anonId);
+
+				if (skippedIds != null && skippedIds.Count > 0)
+				{
+					int i = 0;
+					foreach (int id in skippedIds)
+					{
+						cmd.Parameters.AddWithValue("@skip" + i, id);
+						i++;
+					}
+				}
+
 				con.Open();
 
 				using (MySqlDataReader rdr = cmd.ExecuteReader())
@@ -345,12 +380,64 @@ namespace ProjectTemplate
 			try
 			{
 				string anonId = EnsureAnonId();
-				return GetNextVoteQuestionForAnon(anonId);
+				HashSet<int> skippedIds = GetSkippedQuestionIdsSession();
+				return GetNextVoteQuestionForAnon(anonId, skippedIds);
 			}
 			catch
 			{
 				return null;
 			}
+		}
+
+		[WebMethod(EnableSession = true)]
+		[ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+		public VoteQuestionResult SkipQuestion(int questionId)
+		{
+			VoteQuestionResult result = new VoteQuestionResult();
+
+			if (!IsLoggedInSession())
+			{
+				result.success = false;
+				result.message = "You must be logged in to skip.";
+				result.hasNext = false;
+				return result;
+			}
+
+			if (!IsVerifiedSession())
+			{
+				result.success = false;
+				result.message = "Access Denied";
+				result.hasNext = false;
+				return result;
+			}
+
+			if (questionId <= 0)
+			{
+				result.success = false;
+				result.message = "Invalid question.";
+				result.hasNext = false;
+				return result;
+			}
+
+			string anonId = EnsureAnonId();
+			HashSet<int> skippedIds = GetSkippedQuestionIdsSession();
+			skippedIds.Add(questionId);
+
+			result.success = true;
+			result.message = "Question skipped.";
+
+			try
+			{
+				result.nextQuestion = GetNextVoteQuestionForAnon(anonId, skippedIds);
+				result.hasNext = result.nextQuestion != null;
+			}
+			catch
+			{
+				result.nextQuestion = null;
+				result.hasNext = false;
+			}
+
+			return result;
 		}
 
 		[WebMethod(EnableSession = true)]
@@ -376,19 +463,58 @@ namespace ProjectTemplate
 			}
 
 			string anonId = EnsureAnonId();
+			HashSet<int> skippedIds = GetSkippedQuestionIdsSession();
 
 			try
 			{
 				using (MySqlConnection con = new MySqlConnection(getConString()))
 				{
 					con.Open();
+					using (MySqlTransaction tx = con.BeginTransaction())
+					{
+						string existsSql = "SELECT COUNT(*) FROM Suggestions WHERE SuggestionID = @id";
+
+						using (MySqlCommand existsCmd = new MySqlCommand(existsSql, con, tx))
+						{
+							existsCmd.Parameters.AddWithValue("@id", questionId);
+							int exists = Convert.ToInt32(existsCmd.ExecuteScalar());
+							if (exists == 0)
+							{
+								tx.Rollback();
+								result.success = false;
+								result.message = "Question not found.";
+								result.hasNext = false;
+								return result;
+							}
+						}
+
+						string alreadySql = @"
+							SELECT COUNT(*)
+							FROM SuggestionVotes
+							WHERE SuggestionID = @id AND AnonID = @anonId;
+						";
+
+						using (MySqlCommand alreadyCmd = new MySqlCommand(alreadySql, con, tx))
+						{
+							alreadyCmd.Parameters.AddWithValue("@id", questionId);
+							alreadyCmd.Parameters.AddWithValue("@anonId", anonId);
+							int alreadyCount = Convert.ToInt32(alreadyCmd.ExecuteScalar());
+							if (alreadyCount > 0)
+							{
+								tx.Rollback();
+								result.success = false;
+								result.message = "You have already voted on this question.";
+								result.hasNext = false;
+								return result;
+							}
+						}
 
 					string insertVote = @"
 						INSERT INTO SuggestionVotes (SuggestionID, AnonID, IsUpvote)
 						VALUES (@id, @anonId, @isUpvote);
 					";
 
-					using (MySqlCommand cmd = new MySqlCommand(insertVote, con))
+					using (MySqlCommand cmd = new MySqlCommand(insertVote, con, tx))
 					{
 						cmd.Parameters.AddWithValue("@id", questionId);
 						cmd.Parameters.AddWithValue("@anonId", anonId);
@@ -400,25 +526,29 @@ namespace ProjectTemplate
 						? "UPDATE Suggestions SET UpVotes = UpVotes + 1 WHERE SuggestionID = @id"
 						: "UPDATE Suggestions SET DownVotes = DownVotes + 1 WHERE SuggestionID = @id";
 
-					using (MySqlCommand updateCmd = new MySqlCommand(updateSql, con))
+					using (MySqlCommand updateCmd = new MySqlCommand(updateSql, con, tx))
 					{
 						updateCmd.Parameters.AddWithValue("@id", questionId);
 						updateCmd.ExecuteNonQuery();
+					}
+
+						tx.Commit();
 					}
 				}
 
 				result.success = true;
 				result.message = "Vote recorded.";
+				skippedIds.Remove(questionId);
 			}
 			catch (MySqlException)
 			{
 				result.success = false;
-				result.message = "You have already voted on this question.";
+				result.message = "Vote could not be recorded.";
 			}
 
 			try
 			{
-				result.nextQuestion = GetNextVoteQuestionForAnon(anonId);
+				result.nextQuestion = GetNextVoteQuestionForAnon(anonId, skippedIds);
 				result.hasNext = result.nextQuestion != null;
 			}
 			catch
