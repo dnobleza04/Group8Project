@@ -2,17 +2,99 @@
 <html>
 <head>
     <title>Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@600;700;800&family=Montserrat:wght@700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
     <style>
+    :root {
+      --deep-slate: #2D3E50;
+      --bright-azure: #3498DB;
+      --off-white: #EAF3FF;
+    }
+
         body {
-            font-family: Arial;
-            padding: 40px;
+      font-family: 'Open Sans', Arial, sans-serif;
+      padding: 32px;
+      margin: 0;
+      background: var(--off-white);
+      color: var(--deep-slate);
         }
 
+    h1, h2, h3 {
+      font-family: 'Inter', 'Montserrat', Arial, sans-serif;
+      text-align: center;
+      color: var(--deep-slate);
+      margin-top: 0;
+    }
+
+    h1 { margin-bottom: 6px; }
+
+    .box-title {
+      font-family: 'Inter', 'Montserrat', Arial, sans-serif;
+      font-size: 28px;
+      font-weight: 800;
+      text-align: center;
+      margin: 0 0 8px;
+      color: var(--deep-slate);
+    }
+
+    .box-subtitle {
+      text-align: center;
+      font-size: 14px;
+      font-weight: 400;
+      margin: 0 0 14px;
+      color: #5f7286;
+    }
+
+    .page-subtitle {
+      text-align: center;
+      margin: 0 0 16px;
+    }
+
+    .top-actions {
+      max-width: 1200px;
+      margin: 0 auto 20px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    #btnLogout,
+    #btnAdmin {
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: none;
+      background: var(--bright-azure);
+      color: #fff;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .dashboard-grid {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      gap: 20px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      align-items: start;
+    }
+
+    .full-width {
+      grid-column: 1 / -1;
+    }
+
+    .panel {
+      background: #fff;
+      border: 1px solid #dce4ea;
+      border-radius: 8px;
+      padding: 16px;
+    }
+
         .card {
-            border: 1px solid #ddd;
+      border: 1px solid #ddd;
             padding: 12px;
             margin-bottom: 10px;
-            border-radius: 6px;
+      border-radius: 8px;
         }
 
         .date {
@@ -23,25 +105,27 @@
         button {
             margin-right: 6px;
             padding: 6px 12px;
-            border: none;
+          border: none;
+          border-radius: 8px;
         }
 
          /* Dashboard Card */
   .manager-analytics{
     background:#fff;
     border:1px solid #e6eaf2;
-    border-radius:14px;
+    border-radius:8px;
     padding:16px 16px 14px;
     box-shadow:0 6px 20px rgba(18,38,63,.06);
-    font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-    color:#14223a;
-    max-width:420px;
+    font-family: 'Open Sans', Arial, sans-serif;
+    color: var(--deep-slate);
+    max-width:none;
   }
 
   .ma-title{
-    margin:0 0 10px;
-    font-size:18px;
-    font-weight:700;
+    margin:0 0 8px;
+    font-size:28px;
+    font-weight:800;
+    text-align:center;
   }
 
   .ma-block{ margin-top:12px; }
@@ -56,14 +140,14 @@
   .ma-label{
     font-size:14px;
     font-weight:600;
-    color:#1c2e4a;
+    color:var(--deep-slate);
   }
 
   .ma-value{
     margin-left:auto;
     font-size:14px;
     font-weight:700;
-    color:#1c2e4a;
+    color:var(--deep-slate);
   }
 
  /* completion progress */
@@ -76,7 +160,7 @@
   }
   .ma-progress-fill{
     height:100%;
-    background:#2fbf71; /* green */
+    background:var(--bright-azure);
     border-radius:999px;
     width:0%;
     transition:width .35s ease;
@@ -119,7 +203,7 @@
   .ma-subtitle{
     font-size:14px;
     font-weight:700;
-    color:#1c2e4a;
+    color:var(--deep-slate);
     margin-bottom:8px;
   }
 
@@ -202,14 +286,18 @@
 
 /* carasel cards */
 #surveyCarousel {
-  max-width: 720px;
-  margin: 24px auto;
-  font-family: Arial, sans-serif;
+  max-width: none;
+  margin: 0;
+  font-family: 'Open Sans', Arial, sans-serif;
+  background: #fff;
+  border: 1px solid #dce4ea;
+  border-radius: 8px;
+  padding: 16px;
 }
 
 .card {
   border: 1px solid #ddd;
-  border-radius: 12px;
+  border-radius: 8px;
   padding: 18px;
   min-height: 160px;
   box-shadow: 0 2px 10px rgba(0,0,0,0.06);
@@ -236,17 +324,22 @@
 
 .nav {
   display: flex;
+  justify-content: center;
   gap: 10px;
   margin-top: 12px;
 }
 
 .nav button {
   padding: 10px 14px;
-  border-radius: 10px;
-  border: 1px solid #ccc;
-  background: white;
+  border-radius: 8px;
+  border: none;
+  color: #fff;
   cursor: pointer;
 }
+
+#voteLeftBtn { background: #d9534f; }
+#skipBtn { background: #8d98a5; }
+#voteRightBtn { background: #2e9d57; }
 
 .nav button:disabled {
   opacity: 0.5;
@@ -269,11 +362,51 @@
   display: inline-block;
   padding: 4px 10px;
   border: 1px solid #ddd;
-  border-radius: 999px;
+  border-radius: 8px;
   font-size: 12px;
   color: #555;
   margin-top: 8px;
   background: #f7f7f7;
+}
+
+#surveyCarousel {
+  text-align: center;
+}
+
+#progressText,
+#questionCard {
+  text-align: center;
+}
+
+#btnSubmitSuggestion {
+  display: block;
+  margin: 10px auto 0;
+  background: var(--bright-azure);
+  color: #fff;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+#suggestionMsg {
+  text-align: center;
+}
+
+#suggestionPanel {
+  text-align: center;
+}
+
+#suggestionPanel textarea {
+  width: min(100%, 640px);
+}
+
+#suggestionsList .card {
+  text-align: center;
+}
+
+#suggestionsList .card button {
+  margin: 8px 4px 0;
 }
 
   </style>
@@ -293,82 +426,17 @@
 <body>
 
 <h1>Welcome to the Dashboard</h1>
-<p>You are successfully logged in.</p>
-<button id="btnLogout" type="button">Logout</button>
+<p class="page-subtitle">You are successfully logged in.</p>
 
-<body>
-  <!-- Manager Analytics Dashboard -->
-  <section class="manager-analytics" aria-label="Manager Analytics Dashboard">
-  <h3 class="ma-title">Manager Analytics Dashboard</h3>
-
-  <div class="ma-block">
-    <div class="ma-label-row">
-      <span class="ma-label">Admin Questions Completion:</span>
-      <span id="maCompletionText" class="ma-value" style="display:none;"></span>
-    </div>
-
-  <div class="ma-block">
-  <div class="ma-subtitle">Participation</div>
-
-  <!-- Required Answered -->
-  <div class="ma-label-row">
-    <span class="ma-label">Employee Answered (Required):</span>
-    <span class="ma-value"><span id="reqAnsweredNum">0</span> / 50</span>
-  </div>
-  <div class="ma-progress" role="progressbar" aria-valuemin="0" aria-valuemax="50" aria-valuenow="0">
-    <div class="ma-progress-fill" id="reqAnsweredFill" style="width:0%"></div>
-  </div>
-
-  <!-- Still Need -->
-  <div class="ma-label-row" style="margin-top:10px;">
-    <span class="ma-label">Employee that need to answer:</span>
-    <span class="ma-value"><span id="stillNeedNum">0</span> / 50</span>
-  </div>
-  <div class="ma-progress" role="progressbar" aria-valuemin="0" aria-valuemax="50" aria-valuenow="0">
-    <div class="ma-progress-fill" id="stillNeedFill" style="width:0%"></div>
-  </div>
-
-  <!-- Total Activity -->
-  <div class="ma-label-row" style="margin-top:10px;">
-    <span class="ma-label">Total activity:</span>
-    <span class="ma-value" id="totalActivityNum">0</span>
-  </div>
+<div class="top-actions">
+  <button id="btnAdmin" type="button">Admin</button>
+  <button id="btnLogout" type="button">Logout</button>
 </div>
 
-<div class="ma-progress" role="progressbar"
-     aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"
-     aria-label="Admin Questions Completion">
-  <div class="ma-progress-fill" id="maCompletionFill" style="width:0%"></div>
-</div>
-
-  <div class="ma-block ma-top-concern">
-    <div class="ma-label-row">
-      <span class="ma-label">Top Concern:</span>
-      <span class="ma-top-pill" id="maTopConcern">1:1</span>
-      <span class="ma-top-sub" id="maTopConcernCount">24</span>
-      <span class="ma-icons" aria-hidden="true">
-        <span class="ma-icon ma-flag">🚩</span>
-        <span class="ma-icon ma-thumb">👎</span>
-      </span>
-    </div>
-  </div>
-
-  <div class="ma-block">
-    <div class="ma-subtitle">Trending Employee Topics</div>
-
-    <ul class="ma-topics" id="maTopicsList">
-      <!-- populated by JS -->
-    </ul>
-
-  </div>
-</section>
-
-<hr />
-
-<h2>Employee Ideas</h2>
-
-<div style="max-width: 700px;">
-    <label><b>Submit a suggestion</b></label><br />
+<div class="dashboard-grid">
+<div class="panel full-width" id="suggestionPanel">
+  <h2 class="box-title">Employee Ideas</h2>
+    <p class="box-subtitle">Submit a suggestion!</p>
     <textarea id="suggestionText" rows="4" style="width:100%;"></textarea><br />
     <button id="btnSubmitSuggestion">Submit</button>
     <p id="suggestionMsg" style="color:red;"></p>
@@ -378,7 +446,9 @@
 
 <!-- Begining of req and optional -->
 
-<div id="surveyCarousel">
+<div id="surveyCarousel" class="full-width">
+  <h2 class="box-title">Vote Here!</h2>
+  <p class="box-subtitle">Vote left for no, right for yes, or feel free to skip.</p>
   <div id="progressText"></div>
 
   <div id="questionCard" class="card">
@@ -387,16 +457,20 @@
 
   <div class="nav">
     <button id="voteLeftBtn" type="button">Vote Left</button>
-    <button id="voteRightBtn" type="button">Vote Right</button>
     <button id="skipBtn" type="button">Skip</button>
+    <button id="voteRightBtn" type="button">Vote Right</button>
   </div>
 
   <div id="errorMsg" class="error" style="display:none;"></div>
   <div id="confirmMsg" class="confirm" style="display:none;"></div>
 </div>
 
-<h3>Recent Suggestions</h3>
-<div id="suggestionsList"></div>
+<div class="panel full-width">
+  <h3 class="box-title">Recent Suggestions</h3>
+  <div id="suggestionsList"></div>
+</div>
+
+</div>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 
@@ -460,8 +534,6 @@
           }
 
           loadSuggestions();
-          loadDashboard();
-          setInterval(loadDashboard, 5000);
 
           if (window.initVotingUI) {
             window.initVotingUI();
@@ -551,6 +623,10 @@
 
     $(document).ready(function () {
 
+      $("#btnAdmin").click(function () {
+        window.location.href = "admin-pin.html";
+      });
+
       $("#btnLogout").click(function () {
         doLogout();
       });
@@ -574,7 +650,7 @@
                 dataType: "json",
                 success: function (res) {
 
-                    if (!res.d.success) {
+                  if (!res.d.success) {
 
                         if (res.d.message.includes("logged")) {
                             redirectToLogin();
@@ -598,91 +674,6 @@
 
         checkAccessAndInit();
     });
-
-    // Dashboard Updating logic 
-function loadDashboard() {
-  $.ajax({
-    type: "POST",
-    url: "ProjectServices.asmx/GetDashboardStats", 
-    data: "{}", 
-    contentType: "application/json; charset=utf-8",
-    dataType: "json",
-    success: function (msg) {
-      var data = msg.d; 
-      renderManagerAnalytics(data);
-    },
-    error: function (xhr) {
-      console.log("Dashboard load failed:", xhr.status, xhr.responseText);
-    }
-  });
-}
-
-function renderManagerAnalytics(data){
-  
-  const workforce = 50;
-
-const requiredAnswered = Number(data.requiredAnswered) || 0;
-const stillNeed = Math.max(0, workforce - requiredAnswered);
-const totalActivity = Number(data.totalActivity) || 0;
-
-document.getElementById("reqAnsweredNum").textContent = requiredAnswered;
-document.getElementById("stillNeedNum").textContent = stillNeed;
-document.getElementById("totalActivityNum").textContent = totalActivity;
-
-const reqPct = Math.max(0, Math.min(100, (requiredAnswered / workforce) * 100));
-const needPct = Math.max(0, Math.min(100, (stillNeed / workforce) * 100));
-
-document.getElementById("reqAnsweredFill").style.width = `${reqPct}%`;
-document.getElementById("stillNeedFill").style.width = `${needPct}%`;
-  
-  const pct = Math.max(0, Math.min(100, Number(data.completionPercent) || 0));
-
-  const textEl = document.getElementById("maCompletionText");
-  textEl.textContent = `${pct}%`;
-  textEl.style.display = "inline";
-
-  const fillEl = document.getElementById("maCompletionFill");
-  fillEl.style.width = `${pct}%`;
-  fillEl.parentElement.setAttribute("aria-valuenow", String(pct));
-
-  document.getElementById("maTopConcern").textContent = data.topConcern?.label ?? "—";
-  document.getElementById("maTopConcernCount").textContent = data.topConcern?.count ?? "";
-
-  const list = document.getElementById("maTopicsList");
-  list.innerHTML = "";
-
-  (data.topics || []).forEach(t => {
-    const item = document.createElement("li");
-    item.className = "ma-topic";
-
-    const icon = document.createElement("div");
-    icon.className = "ma-topic-icon";
-    icon.textContent = t.icon || "•";
-
-    const name = document.createElement("div");
-    name.className = "ma-topic-name";
-    name.textContent = t.name || "—";
-
-    const barWrap = document.createElement("div");
-    barWrap.className = "ma-mini-bar";
-
-    const barFill = document.createElement("div");
-    barFill.className = "ma-mini-fill";
-    barFill.style.background = t.color || "#2f7fe0";
-
-    const topicPct = Math.max(0, Math.min(100, Number(t.pct) || 0));
-    barFill.style.width = `${topicPct}%`;
-
-    barWrap.appendChild(barFill);
-
-    const pctEl = document.createElement("div");
-    pctEl.className = "ma-topic-pct";
-    pctEl.textContent = `${topicPct}%`;
-
-    item.append(icon, name, barWrap, pctEl);
-    list.appendChild(item);
-  });
-}
 
 // Beginning of req and optional 
 $("form").submit(function(e) {

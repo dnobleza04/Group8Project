@@ -108,59 +108,114 @@ namespace ProjectTemplate
 		public LoginResult EmployeeLogin(string email, string password)
 		{
 			LoginResult result = new LoginResult();
+			string loginStep = "start";
 
 			try
 			{
-				string sql = @"
-					SELECT employee_ID, is_verified
-					FROM employee
-					WHERE email = @email
-					  AND password_hash = SHA2(@password, 256)
-					LIMIT 1;
-				";
-
+				loginStep = "open_connection";
 				using (MySqlConnection con = new MySqlConnection(getConString()))
-				using (MySqlCommand cmd = new MySqlCommand(sql, con))
 				{
-					cmd.Parameters.AddWithValue("@email", email);
-					cmd.Parameters.AddWithValue("@password", password);
-
 					con.Open();
-					using (MySqlDataReader rdr = cmd.ExecuteReader())
+
+					Func<object, bool> parseVerified = (verifiedObj) =>
 					{
-						if (!rdr.Read())
+						if (verifiedObj == null || verifiedObj == DBNull.Value)
 						{
-							result.success = false;
-							result.message = "Incorrect email or password. Try again.";
-							return result;
+							return true;
 						}
 
-						int employeeId = Convert.ToInt32(rdr["employee_ID"]);
-						bool isVerified = Convert.ToInt32(rdr["is_verified"]) == 1;
-
-						if (!isVerified)
+						if (verifiedObj is bool)
 						{
-							Session.Clear();
-							result.success = false;
-							result.message = "Access Denied";
-							return result;
+							return (bool)verifiedObj;
 						}
 
-						Session["loggedIn"] = true;
-						Session["verified"] = true;
-						Session["employeeId"] = employeeId;
-						EnsureAnonId();
+						string verifiedText = Convert.ToString(verifiedObj);
+						return verifiedText == "1"
+							|| verifiedText.Equals("true", StringComparison.OrdinalIgnoreCase)
+							|| verifiedText.Equals("y", StringComparison.OrdinalIgnoreCase)
+							|| verifiedText.Equals("yes", StringComparison.OrdinalIgnoreCase);
+					};
 
-						result.success = true;
-						result.message = "Login successful.";
-						return result;
-					}
+					Func<string, bool, bool> tryLoginQuery = (verifyColumn, hashPassword) =>
+					{
+						string passwordExpr = hashPassword
+							? "password_hash = SHA2(@password, 256)"
+							: "password = @password";
+
+						string sql = (verifyColumn != null)
+							? "SELECT employee_ID, " + verifyColumn + " FROM employee WHERE email = @email AND " + passwordExpr + " LIMIT 1;"
+							: "SELECT employee_ID, 1 FROM employee WHERE email = @email AND " + passwordExpr + " LIMIT 1;";
+
+						try
+						{
+							loginStep = "execute_login_query";
+							using (MySqlCommand cmd = new MySqlCommand(sql, con))
+							{
+								cmd.Parameters.AddWithValue("@email", email);
+								cmd.Parameters.AddWithValue("@password", password);
+
+								using (MySqlDataReader rdr = cmd.ExecuteReader())
+								{
+									if (!rdr.Read())
+									{
+										return false;
+									}
+
+									int employeeId = Convert.ToInt32(rdr.GetValue(0));
+									bool isVerified = parseVerified(rdr.GetValue(1));
+
+									if (!isVerified)
+									{
+										Session.Clear();
+										result.success = false;
+										result.message = "Access Denied";
+										return true;
+									}
+
+									Session["loggedIn"] = true;
+									Session["verified"] = true;
+									Session["employeeId"] = employeeId;
+									loginStep = "ensure_anon_id";
+									EnsureAnonId();
+
+									result.success = true;
+									result.message = "Login successful.";
+									return true;
+								}
+							}
+						}
+						catch (MySqlException ex)
+						{
+							if (ex.Number == 1054 || ex.Message.IndexOf("Unknown column", StringComparison.OrdinalIgnoreCase) >= 0)
+							{
+								return false;
+							}
+
+							throw;
+						}
+					};
+
+					if (tryLoginQuery("is_verified", true)) return result;
+					if (tryLoginQuery("verified", true)) return result;
+					if (tryLoginQuery("isVerified", true)) return result;
+					if (tryLoginQuery("IsVerified", true)) return result;
+					if (tryLoginQuery(null, true)) return result;
+
+					if (tryLoginQuery("is_verified", false)) return result;
+					if (tryLoginQuery("verified", false)) return result;
+					if (tryLoginQuery("isVerified", false)) return result;
+					if (tryLoginQuery("IsVerified", false)) return result;
+					if (tryLoginQuery(null, false)) return result;
+
+					result.success = false;
+					result.message = "Incorrect email or password. Try again.";
+					return result;
 				}
 			}
 			catch (Exception ex)
 			{
 				result.success = false;
-				result.message = "Server error: " + ex.Message;
+				result.message = "Server error at " + loginStep + ": " + ex.GetType().Name + " - " + ex.Message;
 				return result;
 			}
 		}

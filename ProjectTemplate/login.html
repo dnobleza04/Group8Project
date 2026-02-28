@@ -4,35 +4,67 @@
 <meta charset="utf-8" />
 <title>Employee Login</title>
 
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@600;700;800&family=Montserrat:wght@700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 
 <style>
-body { font-family: Arial, sans-serif; margin: 0; padding: 40px; }
-h1 { margin-bottom: 24px; }
-.box { width: 520px; }
+body {
+    font-family: 'Open Sans', Arial, sans-serif;
+    margin: 0;
+    min-height: 100vh;
+    background: #EAF3FF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #2D3E50;
+}
+h1 {
+    margin: 0 0 24px;
+    text-align: center;
+    font-family: 'Inter', 'Montserrat', Arial, sans-serif;
+    font-weight: 800;
+    color: #2D3E50;
+}
+.box {
+    width: 520px;
+    max-width: calc(100vw - 40px);
+    background: #ffffff;
+    padding: 32px;
+    border-radius: 8px;
+    box-shadow: 0 10px 24px rgba(45, 62, 80, 0.16);
+}
 input {
     width: 100%;
-    padding: 16px;
-    font-size: 18px;
+    padding: 14px;
+    font-size: 16px;
     margin-bottom: 18px;
-    border: 2px solid #333;
-    border-radius: 4px;
+    border: 1px solid #D7DEE3;
+    border-radius: 8px;
     box-sizing: border-box;
+    font-family: 'Open Sans', Arial, sans-serif;
 }
 button {
     width: 100%;
-    padding: 16px;
-    font-size: 18px;
-    border: 2px solid #333;
-    background: #eee;
+    padding: 14px;
+    font-size: 16px;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    background: #3498DB;
+    color: #fff;
     cursor: pointer;
+    font-family: 'Open Sans', Arial, sans-serif;
 }
 button:hover {
-    background: #ddd;
+    background: #2d87c5;
 }
 .msg {
     margin-top: 16px;
-    font-size: 16px;
+    font-size: 14px;
+    text-align: center;
     color: red;
 }
 </style>
@@ -40,96 +72,129 @@ button:hover {
 <script>
 
 function apiUrl(method) {
-    return "/ProjectServices.asmx/" + method;
+    return "ProjectServices.asmx/" + method;
 }
 
-function checkExistingSession() {
-    $.ajax({
-        type: "POST",
-        url: apiUrl("GetAccessStatus"),
-        contentType: "application/json; charset=utf-8",
-        dataType: "json",
-        success: function (res) {
-            if (!res || !res.d) {
-                return;
-            }
+function setMessage(text, color) {
+    const msg = document.getElementById("msg");
+    msg.style.color = color || "red";
+    msg.textContent = text || "";
+}
 
-            const access = res.d;
-
-            if (access.loggedIn && access.verified) {
-                window.location.href = "dashboard.html";
-                return;
-            }
-
-            if (access.loggedIn && !access.verified) {
-                $("#msg").text("Access Denied");
-            }
-        }
+async function postJson(method, payload) {
+    const res = await fetch(apiUrl(method), {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json; charset=utf-8"
+        },
+        body: JSON.stringify(payload || {})
     });
+
+    const text = await res.text();
+    let parsed = null;
+
+    try {
+        parsed = JSON.parse(text);
+    } catch (e) {
+        throw new Error("Invalid server response.");
+    }
+
+    if (!res.ok) {
+        throw new Error(parsed && parsed.Message ? parsed.Message : "Request failed.");
+    }
+
+    return parsed;
 }
 
-function doLogin() {
+async function checkExistingSession() {
+    try {
+        const res = await postJson("GetAccessStatus", {});
+        if (!res || typeof res.d === "undefined") {
+            return;
+        }
 
-    $("#msg").text("");
+        let access = res.d;
+        if (typeof access === "string") {
+            try { access = JSON.parse(access); } catch (e) {}
+        }
 
-    const email = $("#email").val().trim();
-    const password = $("#password").val();
+        if (access && access.loggedIn && access.verified) {
+            window.location.href = "dashboard.html";
+            return;
+        }
+
+        if (access && access.loggedIn && !access.verified) {
+            setMessage("Access Denied", "red");
+        }
+    } catch (e) {
+    }
+}
+
+async function doLogin() {
+    setMessage("", "red");
+
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value;
 
     if (!email || !password) {
-        $("#msg").text("Please enter email and password.");
+        setMessage("Please enter email and password.", "red");
         return;
     }
 
-    $.ajax({
-        type: "POST",
-        url: apiUrl("EmployeeLogin"),
-        data: JSON.stringify({
+    setMessage("Logging in...", "#333");
+
+    try {
+        const res = await postJson("EmployeeLogin", {
             email: email,
             password: password
-        }),
-        contentType: "application/json; charset=utf-8",
-        dataType: "json",
-        success: function (res) {
+        });
 
-            if (!res || !res.d) {
-                $("#msg").text("Unexpected server response.");
-                return;
-            }
-
-            let data = res.d;
-
-            if (typeof data === "string") {
-                try { data = JSON.parse(data); } catch (e) {}
-            }
-
-            if (data.success) {
-                window.location.href = "dashboard.html";
-            } else {
-                $("#msg").text(data.message || "Invalid credentials.");
-            }
-        },
-        error: function () {
-            $("#msg").text("Login failed. Please try again.");
+        if (!res || typeof res.d === "undefined") {
+            setMessage("Unexpected server response.", "red");
+            return;
         }
-    });
+
+        let data = res.d;
+        if (typeof data === "string") {
+            try { data = JSON.parse(data); } catch (e) {}
+        }
+
+        if (data && data.success) {
+            window.location.href = "dashboard.html";
+            return;
+        }
+
+        setMessage((data && data.message) ? data.message : "Invalid credentials.", "red");
+    } catch (e) {
+        setMessage("Login failed: " + e.message, "red");
+    }
 }
 
-$(document).ready(function () {
-
+document.addEventListener("DOMContentLoaded", function () {
     checkExistingSession();
 
-    // Enter key on either field
-    $("#email, #password").keypress(function (e) {
-        if (e.which === 13) {
+    document.querySelector("button").addEventListener("click", function () {
+        doLogin();
+    });
+
+    const emailInput = document.getElementById("email");
+    const passwordInput = document.getElementById("password");
+
+    function onKeyDown(e) {
+        if (e.key === "Enter") {
             doLogin();
         }
-    });
+    }
 
-    // Clear error while typing
-    $("#email, #password").on("input", function () {
-        $("#msg").text("");
-    });
+    emailInput.addEventListener("keydown", onKeyDown);
+    passwordInput.addEventListener("keydown", onKeyDown);
 
+    function clearMsg() {
+        setMessage("", "red");
+    }
+
+    emailInput.addEventListener("input", clearMsg);
+    passwordInput.addEventListener("input", clearMsg);
 });
 
 </script>

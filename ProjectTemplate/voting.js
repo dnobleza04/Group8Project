@@ -3,6 +3,8 @@ let isSubmittingVote = false;
 let dragStartX = null;
 const dragThreshold = 80;
 let pendingConfirmationMessage = "";
+let myLeftVoteCount = 0;
+let myRightVoteCount = 0;
 
 function showVoteError(msg) {
     pendingConfirmationMessage = "";
@@ -35,13 +37,16 @@ function renderVoteQuestion() {
         return;
     }
 
-    $("#progressText").text("Swipe left/right or use buttons to vote.");
+    $("#progressText").text("");
     $("#questionCard").html(`
-        <div style="display:flex; align-items:center; gap:8px;">
-            <h3 style="margin:0;">${escapeHtml(currentVoteQuestion.QuestionText)}</h3>
-        </div>
-        <div style="margin-top:10px; font-size:13px; color:#666;">
-            Left: ${currentVoteQuestion.LeftVotes} | Right: ${currentVoteQuestion.RightVotes}
+        <div style="display:flex; flex-direction:column; min-height:170px;">
+            <div style="display:flex; align-items:center; justify-content:center; gap:8px;">
+                <h3 style="margin:0;">${escapeHtml(currentVoteQuestion.QuestionText)}</h3>
+            </div>
+
+            <div style="margin-top:auto; font-size:13px; color:#666; text-align:center;">
+                Left: ${myLeftVoteCount} | Right: ${myRightVoteCount}
+            </div>
         </div>
     `);
 
@@ -117,6 +122,18 @@ function submitQuestionVote(voteRight) {
                 showVoteError(data.message || "Vote failed.");
                 setVoteButtonsEnabled(true);
                 return;
+            }
+
+            if (voteRight) {
+                myRightVoteCount += 1;
+            } else {
+                myLeftVoteCount += 1;
+            }
+
+            try {
+                sessionStorage.setItem("myLeftVoteCount", String(myLeftVoteCount));
+                sessionStorage.setItem("myRightVoteCount", String(myRightVoteCount));
+            } catch (e) {
             }
 
             showVoteConfirmation("Vote recorded.");
@@ -232,6 +249,16 @@ function bindSwipeVoting() {
 }
 
 function initVotingUI() {
+    try {
+        const savedLeft = parseInt(sessionStorage.getItem("myLeftVoteCount") || "0", 10);
+        const savedRight = parseInt(sessionStorage.getItem("myRightVoteCount") || "0", 10);
+        myLeftVoteCount = isNaN(savedLeft) ? 0 : savedLeft;
+        myRightVoteCount = isNaN(savedRight) ? 0 : savedRight;
+    } catch (e) {
+        myLeftVoteCount = 0;
+        myRightVoteCount = 0;
+    }
+
     $("#voteLeftBtn").on("click", function () { submitQuestionVote(false); });
     $("#voteRightBtn").on("click", function () { submitQuestionVote(true); });
     $("#skipBtn").on("click", function () { skipCurrentQuestion(); });
