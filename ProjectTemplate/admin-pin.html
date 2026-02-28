@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Admin PIN</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@600;700;800&family=Montserrat:wght@700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <style>
+    :root {
+      --deep-slate: #2D3E50;
+      --bright-azure: #3498DB;
+      --off-white: #EAF3FF;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--off-white);
+      font-family: 'Open Sans', Arial, sans-serif;
+      color: var(--deep-slate);
+    }
+
+    .pin-card {
+      width: 420px;
+      max-width: calc(100vw - 40px);
+      background: #fff;
+      border: 1px solid #dce4ea;
+      border-radius: 8px;
+      padding: 24px;
+      box-shadow: 0 10px 24px rgba(45, 62, 80, 0.16);
+      text-align: center;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-family: 'Inter', 'Montserrat', Arial, sans-serif;
+      font-size: 28px;
+      font-weight: 800;
+    }
+
+    p {
+      margin: 0 0 16px;
+      color: #5f7286;
+    }
+
+    input {
+      width: 100%;
+      box-sizing: border-box;
+      border: 1px solid #d7dee3;
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 16px;
+      text-align: center;
+      margin-bottom: 12px;
+    }
+
+    button {
+      width: 100%;
+      border: none;
+      border-radius: 8px;
+      background: var(--bright-azure);
+      color: #fff;
+      font-weight: 600;
+      padding: 12px;
+      cursor: pointer;
+    }
+
+    #msg {
+      margin-top: 12px;
+      min-height: 20px;
+      font-size: 14px;
+      color: #b00020;
+    }
+  </style>
+</head>
+<body>
+  <div class="pin-card">
+    <h1>Admin Access</h1>
+    <p>Enter PIN to continue</p>
+    <input id="pinInput" type="password" inputmode="numeric" placeholder="Enter PIN" />
+    <button id="btnEnter" type="button">Continue</button>
+    <div id="msg"></div>
+  </div>
+
+  <script>
+    const ADMIN_PIN = "50287";
+
+    function apiUrl(method) {
+      return "/ProjectServices.asmx/" + method;
+    }
+
+    function redirectToLogin() {
+      window.location.href = "login.html";
+    }
+
+    function checkAccessStatusThenEnable() {
+      $.ajax({
+        type: "POST",
+        url: apiUrl("GetAccessStatus"),
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        success: function (res) {
+          if (!res || !res.d) {
+            redirectToLogin();
+            return;
+          }
+
+          const access = res.d;
+          if (!access.loggedIn) {
+            redirectToLogin();
+            return;
+          }
+
+          if (!access.verified) {
+            document.body.innerHTML = "<h1 style='font-family:Inter,Arial,sans-serif;text-align:center;margin-top:40px;'>Access Denied</h1>";
+            return;
+          }
+        },
+        error: function () {
+          redirectToLogin();
+        }
+      });
+    }
+
+    function submitPin() {
+      const entered = document.getElementById("pinInput").value.trim();
+      const msg = document.getElementById("msg");
+
+      if (entered === ADMIN_PIN) {
+        sessionStorage.setItem("adminPinVerified", "1");
+        window.location.href = "admin.html";
+        return;
+      }
+
+      msg.textContent = "Password incorrect. Redirecting to dashboard.";
+      setTimeout(function () {
+        window.location.href = "dashboard.html";
+      }, 1300);
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+      checkAccessStatusThenEnable();
+
+      document.getElementById("btnEnter").addEventListener("click", submitPin);
+      document.getElementById("pinInput").addEventListener("keydown", function (e) {
+        if (e.key === "Enter") {
+          submitPin();
+        }
+      });
+    });
+  </script>
+</body>
+</html>
