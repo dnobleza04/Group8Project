@@ -4,6 +4,7 @@ let dragStartX = null;
 const dragThreshold = 80;
 let pendingConfirmationMessage = "";
 let myLeftVoteCount = 0;
+let mySkipCount = 0;
 let myRightVoteCount = 0;
 
 function showVoteError(msg) {
@@ -45,7 +46,7 @@ function renderVoteQuestion() {
             </div>
 
             <div style="margin-top:auto; font-size:13px; color:#666; text-align:center;">
-                Left: ${myLeftVoteCount} | Right: ${myRightVoteCount}
+                Left: ${myLeftVoteCount} | Skip: ${mySkipCount} | Right: ${myRightVoteCount}
             </div>
         </div>
     `);
@@ -130,12 +131,6 @@ function submitQuestionVote(voteRight) {
                 myLeftVoteCount += 1;
             }
 
-            try {
-                sessionStorage.setItem("myLeftVoteCount", String(myLeftVoteCount));
-                sessionStorage.setItem("myRightVoteCount", String(myRightVoteCount));
-            } catch (e) {
-            }
-
             showVoteConfirmation("Vote recorded.");
             currentVoteQuestion = data.nextQuestion || null;
             renderVoteQuestion();
@@ -191,6 +186,7 @@ function skipCurrentQuestion() {
             }
 
             showVoteConfirmation("Question skipped.");
+            mySkipCount += 1;
             currentVoteQuestion = data.nextQuestion || null;
             renderVoteQuestion();
         },
@@ -249,15 +245,9 @@ function bindSwipeVoting() {
 }
 
 function initVotingUI() {
-    try {
-        const savedLeft = parseInt(sessionStorage.getItem("myLeftVoteCount") || "0", 10);
-        const savedRight = parseInt(sessionStorage.getItem("myRightVoteCount") || "0", 10);
-        myLeftVoteCount = isNaN(savedLeft) ? 0 : savedLeft;
-        myRightVoteCount = isNaN(savedRight) ? 0 : savedRight;
-    } catch (e) {
-        myLeftVoteCount = 0;
-        myRightVoteCount = 0;
-    }
+    myLeftVoteCount = 0;
+    mySkipCount = 0;
+    myRightVoteCount = 0;
 
     $("#voteLeftBtn").on("click", function () { submitQuestionVote(false); });
     $("#voteRightBtn").on("click", function () { submitQuestionVote(true); });

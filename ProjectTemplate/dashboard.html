@@ -53,6 +53,18 @@
       background: #e74c3c;
     }
 
+    #voteLeftBtn {
+      background: #dc2626;
+    }
+
+    #voteRightBtn {
+      background: #16a34a;
+    }
+
+    #skipBtn {
+      background: #6b7280;
+    }
+
     .grid {
       max-width: 980px;
       margin: 0 auto;
@@ -89,6 +101,12 @@
 
     .small {
       font-size: 13px;
+      color: #5f7286;
+    }
+
+    .subheader {
+      margin: 0 0 10px;
+      font-size: 14px;
       color: #5f7286;
     }
 
@@ -135,23 +153,10 @@
     </div>
   </div>
 
-  <div class="grid">
-    <section class="card">
-      <h2>Anonymous Feedback</h2>
-      <textarea id="suggestionText" rows="4" placeholder="Share your suggestion..."></textarea>
-      <div style="margin-top:8px;">
-        <button id="btnSubmitSuggestion" type="button">Submit</button>
-      </div>
-      <div id="suggestionMsg" class="msg"></div>
-    </section>
-
-    <section class="card">
-      <h2>Suggestions</h2>
-      <div id="suggestionsCards"></div>
-    </section>
-
-    <section class="card">
-      <h2>Vote</h2>
+  <div class="grid" id="mainGrid">
+    <section class="card" id="voteSection">
+      <h2>Vote Here!</h2>
+      <p class="subheader">Review and vote on site improvements submitted by employees and administrators.</p>
       <div id="progressText" class="small"></div>
       <div id="questionCard"></div>
       <div class="vote-controls">
@@ -161,6 +166,22 @@
       </div>
       <div id="errorMsg" class="msg" style="display:none;"></div>
       <div id="confirmMsg" class="msg" style="display:none;"></div>
+    </section>
+
+    <section class="card" id="suggestionsSection">
+      <h2>Suggestions</h2>
+      <p class="subheader">Review community polls and employee feedback on recent suggestions.</p>
+      <div id="suggestionsCards"></div>
+    </section>
+
+    <section class="card" id="feedbackSection">
+      <h2>Anonymous Feedback</h2>
+      <p class="subheader">Submit your own suggestions for workplace improvements here. (Optional)</p>
+      <textarea id="suggestionText" rows="4" placeholder="Share your suggestion..."></textarea>
+      <div style="margin-top:8px;">
+        <button id="btnSubmitSuggestion" type="button">Submit</button>
+      </div>
+      <div id="suggestionMsg" class="msg"></div>
     </section>
   </div>
 
@@ -185,6 +206,27 @@
 
     function showAccessDenied() {
       document.body.innerHTML = "<h1 style='font-family:Arial,sans-serif;text-align:center;margin-top:40px;'>Access Denied</h1>";
+    }
+
+    function enforceSectionOrder() {
+      const grid = document.getElementById("mainGrid");
+      if (!grid) {
+        return;
+      }
+
+      const vote = document.getElementById("voteSection");
+      const suggestions = document.getElementById("suggestionsSection");
+      const feedback = document.getElementById("feedbackSection");
+
+      if (vote) {
+        grid.appendChild(vote);
+      }
+      if (suggestions) {
+        grid.appendChild(suggestions);
+      }
+      if (feedback) {
+        grid.appendChild(feedback);
+      }
     }
 
     function loadSuggestions() {
@@ -212,8 +254,8 @@
               + "<div class='small'>" + escapeHtml(s.CreatedDate || "") + "</div>"
               + "<div style='margin-top:6px;'>" + escapeHtml(s.SuggestionText || "") + "</div>"
               + "<div class='vote-actions'>"
-              + "<button onclick='voteSuggestion(" + s.SuggestionID + ", true)'>👍 " + (s.UpVotes || 0) + "</button>"
-              + "<button onclick='voteSuggestion(" + s.SuggestionID + ", false)'>👎 " + (s.DownVotes || 0) + "</button>"
+              + "<span class='small'>👍 " + (s.UpVotes || 0) + "</span>"
+              + "<span class='small'>👎 " + (s.DownVotes || 0) + "</span>"
               + "</div>"
               + "</div>";
           });
@@ -225,37 +267,6 @@
         }
       });
     }
-
-    function voteSuggestion(id, isUp) {
-      $.ajax({
-        type: "POST",
-        url: apiUrl("VoteSuggestion"),
-        contentType: "application/json; charset=utf-8",
-        data: JSON.stringify({ suggestionId: id, isUpvote: isUp }),
-        dataType: "json",
-        success: function (res) {
-          const data = res && res.d ? res.d : null;
-          if (!data || !data.success) {
-            const message = data && data.message ? data.message : "Vote failed.";
-            if ((message || "").includes("logged")) {
-              redirectToLogin();
-              return;
-            }
-            if (message === "Access Denied") {
-              showAccessDenied();
-              return;
-            }
-            alert(message);
-             return;
-           }
- 
-           loadSuggestions();
-         },
-         error: function () {
-           alert("Vote failed.");
-         }
-       });
-     }
 
     function submitSuggestion() {
       const text = ($("#suggestionText").val() || "").trim();
@@ -348,6 +359,7 @@
     }
 
     $(document).ready(function () {
+      enforceSectionOrder();
       $("#btnSubmitSuggestion").on("click", submitSuggestion);
       $("#btnAdmin").on("click", function () { window.location.href = "admin-pin.html"; });
       $("#btnLogout").on("click", logout);
