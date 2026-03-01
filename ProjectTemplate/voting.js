@@ -23,10 +23,21 @@ function setVoteButtonsEnabled(enabled) {
     $("#voteLeftBtn, #voteRightBtn, #skipBtn").prop("disabled", !enabled);
 }
 
+function hasNoMoreQuestions() {
+    return !currentVoteQuestion || !currentVoteQuestion.QuestionID;
+}
+
 function renderVoteQuestion() {
-    if (!currentVoteQuestion) {
+    if (hasNoMoreQuestions()) {
+        currentVoteQuestion = null;
         $("#progressText").text("No more questions to vote on.");
-        $("#questionCard").html("<h3 style='margin:0;'>All caught up.</h3><div class='vote-done-badge'>You have voted on every question</div>");
+        $("#questionCardInner").html(
+            "<div class='vote-done-state'>" +
+            "<h3 class='vote-done-title'>All caught up.</h3>" +
+            "<p class='vote-done-badge'>You have voted on every question</p>" +
+            "</div>"
+        );
+        $("#voteStats").text("Yes: " + myRightVoteCount + " | Skip: " + mySkipCount + " | No: " + myLeftVoteCount).show();
         setVoteButtonsEnabled(false);
         $("#errorMsg").hide().text("");
         if (pendingConfirmationMessage) {
@@ -35,21 +46,23 @@ function renderVoteQuestion() {
         } else {
             $("#confirmMsg").hide().text("");
         }
+        notifyVoteRequirementKnown();
         return;
     }
 
     $("#progressText").text("");
-    $("#questionCard").html(`
-        <div style="display:flex; flex-direction:column; min-height:170px;">
-            <div style="display:flex; align-items:center; justify-content:center; gap:8px;">
-                <h3 style="margin:0;">${escapeHtml(currentVoteQuestion.QuestionText)}</h3>
+    $("#questionCardInner").html(`
+        <div class="swipe-track" id="swipeTrack">
+            <div class="swipe-card-inner" id="swipeCardInner">
+                <div style="display:flex; flex-direction:column; flex:1; align-items:center; justify-content:center;">
+                    <h3 style="margin:0;">${escapeHtml(currentVoteQuestion.QuestionText)}</h3>
+                </div>
             </div>
-
-            <div style="margin-top:auto; font-size:13px; color:#666; text-align:center;">
-                Left: ${myLeftVoteCount} | Skip: ${mySkipCount} | Right: ${myRightVoteCount}
-            </div>
+            <span class="swipe-hint swipe-hint-left" id="swipeHintLeft">No</span>
+            <span class="swipe-hint swipe-hint-right" id="swipeHintRight">Yes</span>
         </div>
     `);
+    $("#voteStats").text("Yes: " + myRightVoteCount + " | Skip: " + mySkipCount + " | No: " + myLeftVoteCount).show();
 
     setVoteButtonsEnabled(true);
     $("#errorMsg").hide().text("");
@@ -73,13 +86,25 @@ function loadNextVoteQuestion() {
                 return;
             }
 
-            currentVoteQuestion = res.d;
+            var next = res.d;
+            currentVoteQuestion = (next && next.QuestionID) ? next : null;
             renderVoteQuestion();
+            if (hasNoMoreQuestions()) notifyVoteRequirementKnown();
         },
         error: function () {
             showVoteError("Unable to load question.");
         }
     });
+}
+
+function notifyVoteRequirementKnown() {
+    var completed = hasNoMoreQuestions();
+    try {
+        if (completed) sessionStorage.setItem("voteRequirementComplete", "1");
+    } catch (e) {}
+    if (typeof window.onVoteRequirementKnown === "function") {
+        window.onVoteRequirementKnown(completed);
+    }
 }
 
 function submitQuestionVote(voteRight) {
@@ -132,7 +157,8 @@ function submitQuestionVote(voteRight) {
             }
 
             showVoteConfirmation("Vote recorded.");
-            currentVoteQuestion = data.nextQuestion || null;
+            var next = data.nextQuestion;
+            currentVoteQuestion = (next && next.QuestionID) ? next : null;
             renderVoteQuestion();
         },
         error: function () {
@@ -187,7 +213,8 @@ function skipCurrentQuestion() {
 
             showVoteConfirmation("Question skipped.");
             mySkipCount += 1;
-            currentVoteQuestion = data.nextQuestion || null;
+            var next = data.nextQuestion;
+            currentVoteQuestion = (next && next.QuestionID) ? next : null;
             renderVoteQuestion();
         },
         error: function () {
@@ -199,56 +226,161 @@ function skipCurrentQuestion() {
 }
 
 function bindSwipeVoting() {
-    const card = document.getElementById("questionCard");
+    const card = document.getElementById("questionCardInner");
     if (!card) return;
 
-    const onPointerDown = function (x) {
-        dragStartX = x;
-    };
+    let isDragging = false;
+    let currentX = 0;
 
-    const onPointerUp = function (x) {
-        if (dragStartX === null) return;
+    function getInner() {
+        return document.getElementById("swipeCardInner");
+    }
+    function getHintLeft() { return document.getElementById("swipeHintLeft"); }
+    function getHintRight() { return document.getElementById("swipeHintRight"); }
 
-        const dx = x - dragStartX;
-        dragStartX = null;
-
-        if (Math.abs(dx) < dragThreshold) {
-            return;
-        }
-
+    function updateDragVisual(dx) {
+        const inner = getInner();
+        const hintL = getHintLeft();
+        const hintR = getHintRight();
+        if (!inner) return;
+        var t = Math.min(Math.abs(dx) / dragThreshold, 1);
+        var tilt = dx * 0.025;
+        var scale = 1 + 0.02 * t;
+        inner.style.transform = "translateX(" + dx + "px) rotate(" + tilt + "deg) scale(" + scale + ")";
+        inner.classList.add("dragging");
         if (dx > 0) {
-            submitQuestionVote(true);
+            inner.style.backgroundColor = "rgba(34, 197, 94, " + (0.18 * t) + ")";
+            if (hintL) hintL.style.opacity = "0";
+            if (hintR) hintR.style.opacity = t * 0.9;
+        } else if (dx < 0) {
+            inner.style.backgroundColor = "rgba(239, 68, 68, " + (0.18 * t) + ")";
+            if (hintL) hintL.style.opacity = t * 0.9;
+            if (hintR) hintR.style.opacity = "0";
         } else {
-            submitQuestionVote(false);
+            inner.style.backgroundColor = "";
+            if (hintL) hintL.style.opacity = "0";
+            if (hintR) hintR.style.opacity = "0";
         }
-    };
+    }
+
+    function clearDragVisual() {
+        const inner = getInner();
+        const hintL = getHintLeft();
+        const hintR = getHintRight();
+        if (inner) {
+            inner.style.transform = "";
+            inner.style.backgroundColor = "";
+            inner.classList.remove("dragging");
+        }
+        if (hintL) hintL.style.opacity = "0";
+        if (hintR) hintR.style.opacity = "0";
+    }
+
+    function clearDragCursor() {
+        document.body.classList.remove("swipe-dragging");
+        document.body.style.cursor = "";
+    }
+
+    function onPointerDown(x, isTouch) {
+        if (!getInner() || isSubmittingVote) return;
+        dragStartX = x;
+        isDragging = true;
+        currentX = x;
+        if (!isTouch) {
+            document.body.classList.add("swipe-dragging");
+            document.body.style.cursor = "grabbing";
+        }
+
+        function onMove(x) {
+            if (dragStartX === null) return;
+            currentX = x;
+            var dx = x - dragStartX;
+            updateDragVisual(dx);
+        }
+        function onUp(x) {
+            if (dragStartX === null) return;
+            var dx = x - dragStartX;
+            dragStartX = null;
+            isDragging = false;
+            clearDragCursor();
+
+            document.removeEventListener("mousemove", onMouseMove);
+            document.removeEventListener("mouseup", onMouseUp);
+            document.removeEventListener("touchmove", onTouchMove, { passive: true });
+            document.removeEventListener("touchend", onTouchEnd, { passive: true });
+
+            if (Math.abs(dx) < dragThreshold) {
+                clearDragVisual();
+                return;
+            }
+
+            var voteYes = dx > 0;
+            var inner = getInner();
+            if (!inner) return;
+
+            inner.classList.remove("dragging");
+            inner.classList.add("swipe-fly-away");
+            void inner.offsetHeight;
+            requestAnimationFrame(function () {
+                inner.style.transform = voteYes ? "translateX(120%) rotate(12deg)" : "translateX(-120%) rotate(-12deg)";
+                inner.style.opacity = "0";
+            });
+
+            var done = false;
+            function finish() {
+                if (done) return;
+                done = true;
+                inner.removeEventListener("transitionend", onFlyEnd);
+                submitQuestionVote(voteYes);
+            }
+            function onFlyEnd(e) {
+                if (e.target !== inner) return;
+                if (e.propertyName === "transform" || e.propertyName === "opacity") finish();
+            }
+            inner.addEventListener("transitionend", onFlyEnd);
+            setTimeout(finish, 450);
+        }
+
+        var onMouseMove = function (e) { onMove(e.clientX); };
+        var onMouseUp = function (e) { onUp(e.clientX); };
+        function onTouchMove(e) {
+            if (e.touches && e.touches.length > 0) onMove(e.touches[0].clientX);
+        }
+        function onTouchEnd(e) {
+            if (e.changedTouches && e.changedTouches.length > 0) onUp(e.changedTouches[0].clientX);
+        }
+
+        document.addEventListener("mousemove", onMouseMove);
+        document.addEventListener("mouseup", onMouseUp);
+        document.addEventListener("touchmove", onTouchMove, { passive: true });
+        document.addEventListener("touchend", onTouchEnd, { passive: true });
+    }
+
+    function onPointerDownMouse(x) { onPointerDown(x, false); }
+    function onPointerDownTouch(x) { onPointerDown(x, true); }
 
     card.addEventListener("mousedown", function (e) {
-        onPointerDown(e.clientX);
-    });
-
-    card.addEventListener("mouseup", function (e) {
-        onPointerUp(e.clientX);
+        if (e.button !== 0) return;
+        var track = document.getElementById("swipeTrack");
+        if (!track || !track.contains(e.target)) return;
+        onPointerDownMouse(e.clientX);
     });
 
     card.addEventListener("touchstart", function (e) {
         if (e.touches && e.touches.length > 0) {
-            onPointerDown(e.touches[0].clientX);
-        }
-    }, { passive: true });
-
-    card.addEventListener("touchend", function (e) {
-        if (e.changedTouches && e.changedTouches.length > 0) {
-            onPointerUp(e.changedTouches[0].clientX);
+            var track = document.getElementById("swipeTrack");
+            if (!track || !track.contains(e.target)) return;
+            onPointerDownTouch(e.touches[0].clientX);
         }
     }, { passive: true });
 }
 
-function initVotingUI() {
+function initVotingUI(options) {
     myLeftVoteCount = 0;
     mySkipCount = 0;
     myRightVoteCount = 0;
 
+    $("#voteStats").text("Yes: 0 | Skip: 0 | No: 0").show();
     $("#voteLeftBtn").on("click", function () { submitQuestionVote(false); });
     $("#voteRightBtn").on("click", function () { submitQuestionVote(true); });
     $("#skipBtn").on("click", function () { skipCurrentQuestion(); });

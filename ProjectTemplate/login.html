@@ -5,78 +5,101 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
 	<title>Employee Login</title>
 	<style>
-		:root {
-			--deep-slate: #2D3E50;
-			--bright-azure: #3498DB;
-			--off-white: #EAF3FF;
-		}
-
-		body {
-			margin: 0;
-			min-height: 100vh;
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			background: var(--off-white);
-			font-family: Arial, sans-serif;
-			color: var(--deep-slate);
-		}
-
-		.card {
-			width: 420px;
-			max-width: calc(100vw - 32px);
-			background: #fff;
-			border: 1px solid #dce4ea;
-			border-radius: 10px;
-			padding: 24px;
-			box-shadow: 0 10px 24px rgba(45, 62, 80, 0.16);
-		}
-
-		h1 {
-			margin: 0 0 8px;
-			text-align: center;
-		}
-
-		p.sub {
-			margin: 0 0 16px;
-			text-align: center;
-			color: #5f7286;
-		}
-
-		label {
-			display: block;
-			margin: 10px 0 6px;
-			font-weight: 600;
-		}
-
-		input {
-			width: 100%;
-			box-sizing: border-box;
-			border: 1px solid #d7dee3;
-			border-radius: 8px;
-			padding: 11px;
-			font-size: 15px;
-		}
-
-		button {
-			margin-top: 14px;
-			width: 100%;
-			border: none;
-			border-radius: 8px;
-			background: var(--bright-azure);
-			color: #fff;
-			font-weight: 700;
-			padding: 12px;
-			cursor: pointer;
-		}
-
-		#msg {
-			margin-top: 12px;
-			min-height: 20px;
-			font-size: 14px;
-			color: #b00020;
-			text-align: center;
-		}
+:root{
+  --bg1:#0f172a;
+  --bg2:#1e293b;
+  --text:#f1f5f9;
+  --muted:#94a3b8;
+  --primary:#4f46e5;
+  --red:#ef4444;
+  --green:#22c55e;
+  --card-text:#0f172a;
+  --card-bg: rgba(248, 250, 252, 0.97);
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.06);
+  --border: rgba(0, 0, 0, 0.08);
+}
+*{ box-sizing: border-box; }
+body{
+  margin:0;
+  min-height:100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color:var(--text);
+  font-family: "Segoe UI", Roboto, Arial, sans-serif;
+  background:
+    radial-gradient(1100px 600px at 15% 15%, var(--bg2), transparent 60%),
+    radial-gradient(900px 500px at 85% 25%, #1e3a5f, transparent 55%),
+    linear-gradient(180deg, var(--bg1), #0f172a);
+}
+.card{
+  width: 420px;
+  max-width: calc(100vw - 32px);
+  background: var(--card-bg);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 18px;
+  padding: 24px;
+  box-shadow: var(--shadow-card);
+  color: var(--card-text);
+}
+.card h1{
+  margin: 0 0 8px;
+  text-align: center;
+  font-size: 28px;
+  font-weight: 900;
+  letter-spacing: -0.5px;
+}
+p.sub{
+  margin: 0 0 16px;
+  text-align: center;
+  color: #64748b;
+  font-size: 14px;
+}
+label{
+  display: block;
+  margin: 10px 0 6px;
+  font-weight: 700;
+  font-size: 14px;
+}
+input{
+  width: 100%;
+  box-sizing: border-box;
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  padding: 11px 12px;
+  font-size: 15px;
+  background: rgba(255,255,255,0.95);
+  transition: 0.2s ease;
+}
+input:focus{
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(79,70,229,0.15);
+}
+button{
+  margin-top: 14px;
+  width: 100%;
+  border: none;
+  border-radius: 12px;
+  background: var(--primary);
+  color: #fff;
+  font-weight: 900;
+  padding: 12px;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+button:hover{
+  transform: translateY(-1px);
+  box-shadow: 0 12px 20px rgba(15,23,42,0.14);
+}
+#msg{
+  margin-top: 12px;
+  min-height: 20px;
+  font-size: 14px;
+  font-weight: 700;
+  text-align: center;
+}
 	</style>
 </head>
 <body>

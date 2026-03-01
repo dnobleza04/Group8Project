@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Employee Questions</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+  <style>
+
+    :root{
+  --bg1:#0f172a;
+  --bg2:#1e293b;
+  --border-topbar: rgba(255, 255, 255, 0.22);
+  --text:#f1f5f9;
+  --muted:#94a3b8;
+  --card-text:#0f172a;
+  --card-bg: rgba(248, 250, 252, 0.97);
+  --red:#ef4444;
+  --amber:#f59e0b;
+  --green:#22c55e;
+  --primary:#4f46e5;
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.06);
+  --border: rgba(0, 0, 0, 0.08);
+}
+
+*{ box-sizing: border-box; }
+
+body{
+  margin:0;
+  min-height:100vh;
+  color:var(--text);
+  font-family: "Segoe UI", Roboto, Arial, sans-serif;
+  visibility: hidden;
+  background:
+    radial-gradient(1100px 600px at 15% 15%, var(--bg2), transparent 60%),
+    radial-gradient(900px 500px at 85% 25%, #1e3a5f, transparent 55%),
+    linear-gradient(180deg, var(--bg1), #0f172a);
+}
+
+.topbar{
+  position: sticky;
+  top:0;
+  z-index: 50;
+  background: rgba(15, 23, 42, 0.94);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border-topbar);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+}
+.topbarInner{
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+.brand{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 900;
+  letter-spacing: .2px;
+  flex-shrink: 0;
+}
+.logoDot{
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--primary), #60a5fa);
+  box-shadow: 0 10px 18px rgba(79,70,229,0.20);
+}
+.navLinks{
+  display: flex;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+  justify-content: center;
+  flex-wrap: nowrap;
+  font-size: 14px;
+}
+.navLinks a{
+  color: var(--muted);
+  text-decoration: none;
+  padding: 8px 14px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  font-weight: 800;
+  transition: 0.2s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.navLinks a:hover{
+  color: var(--text);
+  background: rgba(79,70,229,0.08);
+}
+.navLinks a.active{
+  color: var(--primary);
+  background: rgba(79,70,229,0.10);
+  box-shadow: inset 0 0 0 1px rgba(79,70,229,0.25);
+}
+
+/* Page */
+.container{
+  max-width: 900px;
+  margin: 26px auto;
+  padding: 0 16px;
+}
+h1{
+  margin: 0 0 10px 0;
+  font-size: 38px;
+  font-weight: 900;
+  letter-spacing: -0.5px;
+}
+.subtext{
+  margin: 0 0 18px 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+/* Cards */
+.card{
+  background: var(--card-bg);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 18px;
+  padding: 16px;
+  box-shadow: var(--shadow-card);
+  margin-bottom: 14px;
+  color: var(--card-text);
+}
+.card .subtext, .card .small, .card .meta{ color: #64748b; }
+.cardHeader{
+  display:flex;
+  align-items:flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.cardTitle{
+  font-size: 18px;
+  font-weight:900;
+  margin:0;
+}
+.pill{
+  font-size:12px;
+  color: var(--muted);
+  border:1px solid var(--border);
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.85);
+  white-space: nowrap;
+}
+
+.promptText{
+  font-size: 20px;
+  line-height: 1.35;
+  margin: 0;
+  font-weight: 900;
+  letter-spacing: -0.25px;
+}
+.meta{
+  margin-top: 8px;
+  font-size: 12.5px;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+/* Buttons (keep your colors) */
+.btnRow{
+  display:flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+}
+button{
+  border:none;
+  border-radius: 12px;
+  padding: 11px 14px;
+  font-weight: 900;
+  cursor:pointer;
+  white-space: nowrap;
+  transition: 0.2s ease;
+}
+button:hover{
+  transform: translateY(-1px);
+  box-shadow: 0 12px 20px rgba(15,23,42,0.14);
+}
+button:active{
+  transform: translateY(0);
+}
+
+.btnAgree{ background: var(--green); color:#111827; }
+.btnNeeds{ background: var(--amber); color:#111827; }
+.btnBad{ background: var(--red); color:#111827; }
+.btnSkip{
+  background: rgba(100,116,139,0.18);
+  color:#111827;
+  border:1px solid rgba(100,116,139,0.30);
+}
+.top-actions, .topbar-actions{
+  flex-shrink: 0;
+  min-width: 280px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: nowrap;
+}
+#btnAdmin{ background: rgba(255,255,255,0.95); color: #0f172a; border: 1px solid rgba(255,255,255,0.4); }
+#btnLogout{ background: var(--red); color: #fff; }
+
+/* Optional feedback */
+.feedbackBox{
+  margin-top: 14px;
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: rgba(79,70,229,0.05);
+  display:none;
+}
+textarea{
+  width:100%;
+  min-height:90px;
+  border-radius:12px;
+  border:1.5px solid var(--border);
+  background: rgba(255,255,255,0.95);
+  color: var(--text);
+  padding:10px 12px;
+  resize: vertical;
+  transition: 0.2s ease;
+}
+textarea:focus{
+  outline:none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(79,70,229,0.15);
+}
+.feedbackTop{
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+.small{
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 700;
+}
+.toast{
+  margin-top:10px;
+  display:none;
+  background: rgba(22,163,74,0.10);
+  border:1px solid rgba(22,163,74,0.22);
+  padding:10px 12px;
+  border-radius:12px;
+  color: #166534;
+  font-size: 13px;
+  font-weight: 800;
+}
+.empty{
+  padding: 12px;
+  border:1px dashed var(--border);
+  border-radius: 14px;
+  color: var(--muted);
+  font-size: 13px;
+  background: rgba(255,255,255,0.7);
+}
+
+/* Vote on ideas (same as dashboard Vote Here) */
+.subheader{ margin: 0 0 12px; font-size: 14px; color: var(--muted); }
+.vote-box{
+  min-height: 380px;
+  margin-top: 8px;
+  border-radius: 18px;
+  overflow: hidden;
+  background: var(--card-bg);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.5), 0 4px 20px rgba(0, 0, 0, 0.15);
+  color: var(--card-text);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+#ideaCardInner{
+  flex: 1;
+  min-height: 200px;
+  cursor: grab;
+  user-select: none;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+.vote-stats{
+  flex-shrink: 0;
+  padding: 14px 24px 12px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #64748b;
+  text-align: center;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  background: rgba(255, 255, 255, 0.35);
+}
+#ideaCardInner:active{ cursor: grabbing; }
+body.swipe-dragging-idea{ cursor: grabbing !important; }
+body.swipe-dragging-idea *{ cursor: grabbing !important; }
+.vote-box .vote-controls{
+  display: flex;
+  flex-shrink: 0;
+  padding: 16px 20px 18px;
+  gap: 14px;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  background: rgba(255, 255, 255, 0.4);
+}
+.vote-box .vote-controls button{ padding: 14px 24px; font-size: 15px; min-width: 100px; }
+#ideaVoteLeftBtn{ background: var(--red); color: #fff; }
+#ideaVoteRightBtn{ background: var(--green); color: #111827; }
+#ideaSkipBtn{ background: rgba(100,116,139,0.18); color: #111827; border: 1px solid rgba(100,116,139,0.30); }
+.idea-swipe-track{ position: relative; flex: 1; min-height: 160px; padding: 24px; display: flex; flex-direction: column; min-height: 0; }
+.idea-swipe-inner{
+  position: relative; z-index: 1; transition: transform 0.2s ease-out;
+  flex: 1; min-height: 120px; display: flex; flex-direction: column; will-change: transform;
+}
+.idea-swipe-inner.dragging{ transition: none; }
+.idea-swipe-inner.swipe-fly-away{
+  transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.3s ease-out;
+}
+.idea-swipe-inner h3{ font-size: 22px; line-height: 1.4; margin: 0; }
+.idea-swipe-hint{
+  position: absolute; top: 50%; transform: translateY(-50%);
+  font-weight: 900; font-size: 22px; letter-spacing: 0.05em; opacity: 0;
+  pointer-events: none; z-index: 0; transition: opacity 0.15s ease;
+  border-radius: 12px; padding: 10px 18px;
+}
+.idea-swipe-hint-left{ left: 24px; color: var(--red); }
+.idea-swipe-hint-right{ right: 24px; color: var(--green); }
+.vote-done-state{
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  min-height: 260px; padding: 40px 32px; text-align: center;
+}
+.vote-done-state .vote-done-title{ margin: 0 0 16px 0; font-size: 26px; font-weight: 900; color: var(--card-text); line-height: 1.3; }
+.vote-done-state .vote-done-badge{ margin: 0; font-size: 15px; color: #64748b; line-height: 1.5; max-width: 320px; }
+.msg{ margin-top: 8px; min-height: 20px; font-size: 14px; font-weight: 700; }
+  </style>
+</head>
+
+<body>
+  <div class="topbar">
+    <div class="topbarInner">
+      <div class="brand">
+        <div class="logoDot"></div>
+        <div>Employee Feedback</div>
+      </div>
+
+      <div class="navLinks">
+        <a href="dashboard.html">Dashboard</a>
+        <a class="active" href="employee.html">Employee</a>
+        <a href="ideasubmit.html">Submit Idea</a>
+      </div>
+      <div class="top-actions topbar-actions">
+        <button id="btnAdmin" type="button">Admin</button>
+        <button id="btnLogout" type="button">Logout</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <h1>Employee Questions</h1>
+    <p class="subtext">
+      Vote on peer ideas and share optional written feedback to help shape workplace improvements.
+    </p>
+
+    <section class="card" id="ideaVoteSection">
+      <h2 style="margin-top:0;">Vote On Peer Ideas</h2>
+      <p class="subheader">Share your opinion on suggestions from colleagues. Your votes help surface the most supported ideas.</p>
+      <div id="ideaProgressText" class="small"></div>
+      <div class="vote-box">
+        <div id="ideaCardInner"></div>
+        <div class="vote-stats" id="ideaVoteStats"></div>
+        <div class="vote-controls">
+          <button id="ideaVoteLeftBtn" type="button">No</button>
+          <button id="ideaSkipBtn" type="button">Skip</button>
+          <button id="ideaVoteRightBtn" type="button">Yes</button>
+        </div>
+      </div>
+      <div id="ideaErrorMsg" class="msg" style="display:none;"></div>
+      <div id="ideaConfirmMsg" class="msg" style="display:none;"></div>
+    </section>
+  </div>
+
+  <script>
+    // ======================
+    // Site integration: same API and auth as dashboard/admin
+    // ======================
+    function apiUrl(method) {
+      return "/ProjectServices.asmx/" + method;
+    }
+
+    function redirectToLogin() {
+      window.location.href = "login.html";
+    }
+
+    function showAccessDenied() {
+      document.body.innerHTML = "<h1 style='font-family:\"Segoe UI\",Roboto,Arial,sans-serif;text-align:center;margin-top:40px;'>Access Denied</h1>";
+    }
+
+    function checkAccessAndInit() {
+      $.ajax({
+        type: "POST",
+        url: apiUrl("GetAccessStatus"),
+        contentType: "application/json; charset=utf-8",
+        data: "{}",
+        dataType: "json",
+        success: function (res) {
+          if (!res || !res.d) {
+            redirectToLogin();
+            return;
+          }
+          var access = res.d;
+          if (!access.loggedIn) {
+            redirectToLogin();
+            return;
+          }
+          if (!access.verified) {
+            document.body.style.visibility = "visible";
+            showAccessDenied();
+            return;
+          }
+          $.ajax({
+            type: "POST",
+            url: apiUrl("HasCompletedVoteRequirement"),
+            contentType: "application/json; charset=utf-8",
+            data: "{}",
+            dataType: "json",
+            success: function (voteRes) {
+              var voteData = voteRes && voteRes.d ? voteRes.d : null;
+              if (voteData && !voteData.completed) {
+                window.location.href = "dashboard.html?mustVote=1";
+                return;
+              }
+              document.body.style.visibility = "visible";
+              initEmployeePage();
+            },
+            error: function () {
+              document.body.style.visibility = "visible";
+              initEmployeePage();
+            }
+          });
+        },
+        error: function () {
+          redirectToLogin();
+        }
+      });
+    }
+
+    function logout() {
+      $.ajax({
+        type: "POST",
+        url: apiUrl("Logout"),
+        contentType: "application/json; charset=utf-8",
+        data: "{}",
+        dataType: "json",
+        complete: function () {
+          try { sessionStorage.removeItem("adminPinVerified"); } catch (e) {}
+          redirectToLogin();
+        }
+      });
+    }
+
+    function escapeHtml(text) {
+      return String(text)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    var currentIdea = null;
+    var isSubmittingIdeaVote = false;
+    var ideaYesCount = 0, ideaSkipCount = 0, ideaNoCount = 0;
+    var ideaDragStartX = null;
+    var IDEA_DRAG_THRESHOLD = 80;
+
+    function showIdeaError(msg) {
+      $("#ideaConfirmMsg").hide().text("");
+      $("#ideaErrorMsg").show().text(msg);
+    }
+    function showIdeaConfirm(msg) {
+      $("#ideaErrorMsg").hide().text("");
+      $("#ideaConfirmMsg").show().text(msg);
+    }
+    function setIdeaButtonsEnabled(enabled) {
+      $("#ideaVoteLeftBtn, #ideaVoteRightBtn, #ideaSkipBtn").prop("disabled", !enabled);
+    }
+
+    function renderIdea() {
+      var card = $("#ideaCardInner");
+      if (!currentIdea) {
+        $("#ideaProgressText").text("");
+        card.html(
+          "<div class='vote-done-state'>" +
+          "<h3 class='vote-done-title'>All caught up.</h3>" +
+          "<p class='vote-done-badge'>You have voted on every idea, or there are no ideas yet.</p>" +
+          "</div>"
+        );
+        $("#ideaVoteStats").text("Yes: " + ideaYesCount + " | Skip: " + ideaSkipCount + " | No: " + ideaNoCount).show();
+        setIdeaButtonsEnabled(false);
+        return;
+      }
+
+      $("#ideaProgressText").text("");
+      card.html(
+        "<div class='idea-swipe-track' id='ideaSwipeTrack'>" +
+        "<div class='idea-swipe-inner' id='ideaSwipeInner'>" +
+        "<div style='display:flex;flex-direction:column;flex:1;align-items:center;justify-content:center;'>" +
+        "<h3 style='margin:0;'>" + escapeHtml(currentIdea.IdeaText) + "</h3>" +
+        "</div>" +
+        "</div>" +
+        "<span class='idea-swipe-hint idea-swipe-hint-left' id='ideaSwipeHintLeft'>No</span>" +
+        "<span class='idea-swipe-hint idea-swipe-hint-right' id='ideaSwipeHintRight'>Yes</span>" +
+        "</div>"
+      );
+      $("#ideaVoteStats").text("Yes: " + ideaYesCount + " | Skip: " + ideaSkipCount + " | No: " + ideaNoCount).show();
+      setIdeaButtonsEnabled(true);
+    }
+
+    function loadNextIdea() {
+      $.ajax({
+        type: "POST",
+        url: apiUrl("GetNextIdeaForVote"),
+        contentType: "application/json; charset=utf-8",
+        data: "{}",
+        dataType: "json",
+        success: function (res) {
+          if (!res || typeof res.d === "undefined") {
+            currentIdea = null;
+            renderIdea();
+            return;
+          }
+          currentIdea = res.d;
+          renderIdea();
+        },
+        error: function () {
+          showIdeaError("Unable to load idea.");
+          currentIdea = null;
+          renderIdea();
+        }
+      });
+    }
+
+    function submitIdeaVote(isUpvote) {
+      if (!currentIdea || isSubmittingIdeaVote) return;
+      isSubmittingIdeaVote = true;
+      setIdeaButtonsEnabled(false);
+
+      $.ajax({
+        type: "POST",
+        url: apiUrl("VoteIdea"),
+        contentType: "application/json; charset=utf-8",
+        data: JSON.stringify({ ideaId: currentIdea.IdeaID, isUpvote: isUpvote }),
+        dataType: "json",
+        success: function (res) {
+          isSubmittingIdeaVote = false;
+          if (!res || !res.d) {
+            showIdeaError("Vote failed.");
+            setIdeaButtonsEnabled(true);
+            return;
+          }
+          var data = res.d;
+          if (!data.success) {
+            if ((data.message || "").indexOf("logged") >= 0) { redirectToLogin(); return; }
+            if (data.message === "Access Denied") { showAccessDenied(); return; }
+            showIdeaError(data.message || "Vote failed.");
+            setIdeaButtonsEnabled(true);
+            return;
+          }
+          if (isUpvote) ideaYesCount++; else ideaNoCount++;
+          showIdeaConfirm("Vote recorded.");
+          currentIdea = data.nextIdea || null;
+          renderIdea();
+        },
+        error: function () {
+          isSubmittingIdeaVote = false;
+          showIdeaError("Vote failed.");
+          setIdeaButtonsEnabled(true);
+        }
+      });
+    }
+
+    function skipCurrentIdea() {
+      if (!currentIdea || isSubmittingIdeaVote) return;
+      isSubmittingIdeaVote = true;
+      setIdeaButtonsEnabled(false);
+
+      $.ajax({
+        type: "POST",
+        url: apiUrl("SkipIdea"),
+        contentType: "application/json; charset=utf-8",
+        data: JSON.stringify({ ideaId: currentIdea.IdeaID }),
+        dataType: "json",
+        success: function (res) {
+          isSubmittingIdeaVote = false;
+          if (!res || !res.d) {
+            showIdeaError("Skip failed.");
+            setIdeaButtonsEnabled(true);
+            return;
+          }
+          var data = res.d;
+          if (!data.success) {
+            if (data.message === "Access Denied") { showAccessDenied(); return; }
+            if ((data.message || "").indexOf("logged") >= 0) { redirectToLogin(); return; }
+            showIdeaError(data.message || "Skip failed.");
+            setIdeaButtonsEnabled(true);
+            return;
+          }
+          ideaSkipCount++;
+          showIdeaConfirm("Skipped.");
+          currentIdea = data.nextIdea || null;
+          renderIdea();
+        },
+        error: function () {
+          isSubmittingIdeaVote = false;
+          showIdeaError("Skip failed.");
+          setIdeaButtonsEnabled(true);
+        }
+      });
+    }
+
+    function bindSwipeIdeaVoting() {
+      var card = document.getElementById("ideaCardInner");
+      if (!card) return;
+
+      function getInner() { return document.getElementById("ideaSwipeInner"); }
+      function getHintLeft() { return document.getElementById("ideaSwipeHintLeft"); }
+      function getHintRight() { return document.getElementById("ideaSwipeHintRight"); }
+
+      function updateDragVisual(dx) {
+        var inner = getInner();
+        var hintL = getHintLeft();
+        var hintR = getHintRight();
+        if (!inner) return;
+        var t = Math.min(Math.abs(dx) / IDEA_DRAG_THRESHOLD, 1);
+        var tilt = dx * 0.025;
+        var scale = 1 + 0.02 * t;
+        inner.style.transform = "translateX(" + dx + "px) rotate(" + tilt + "deg) scale(" + scale + ")";
+        inner.classList.add("dragging");
+        if (dx > 0) {
+          inner.style.backgroundColor = "rgba(34, 197, 94, " + (0.18 * t) + ")";
+          if (hintL) hintL.style.opacity = "0";
+          if (hintR) hintR.style.opacity = t * 0.9;
+        } else if (dx < 0) {
+          inner.style.backgroundColor = "rgba(239, 68, 68, " + (0.18 * t) + ")";
+          if (hintL) hintL.style.opacity = t * 0.9;
+          if (hintR) hintR.style.opacity = "0";
+        } else {
+          inner.style.backgroundColor = "";
+          if (hintL) hintL.style.opacity = "0";
+          if (hintR) hintR.style.opacity = "0";
+        }
+      }
+      function clearDragVisual() {
+        var inner = getInner();
+        var hintL = getHintLeft();
+        var hintR = getHintRight();
+        if (inner) { inner.style.transform = ""; inner.style.backgroundColor = ""; inner.classList.remove("dragging"); }
+        if (hintL) hintL.style.opacity = "0";
+        if (hintR) hintR.style.opacity = "0";
+      }
+
+      function onPointerDown(x, isTouch) {
+        if (!getInner() || isSubmittingIdeaVote) return;
+        ideaDragStartX = x;
+        if (!isTouch) {
+          document.body.classList.add("swipe-dragging-idea");
+          document.body.style.cursor = "grabbing";
+        }
+
+        function onMove(x) {
+          if (ideaDragStartX === null) return;
+          var dx = x - ideaDragStartX;
+          updateDragVisual(dx);
+        }
+        function onUp(x) {
+          if (ideaDragStartX === null) return;
+          var dx = x - ideaDragStartX;
+          ideaDragStartX = null;
+          document.body.classList.remove("swipe-dragging-idea");
+          document.body.style.cursor = "";
+
+          document.removeEventListener("mousemove", onMouseMove);
+          document.removeEventListener("mouseup", onMouseUp);
+          document.removeEventListener("touchmove", onTouchMove, { passive: true });
+          document.removeEventListener("touchend", onTouchEnd, { passive: true });
+
+          if (Math.abs(dx) < IDEA_DRAG_THRESHOLD) {
+            clearDragVisual();
+            return;
+          }
+
+          var voteYes = dx > 0;
+          var inner = getInner();
+          if (!inner) return;
+
+          inner.classList.remove("dragging");
+          inner.classList.add("swipe-fly-away");
+          void inner.offsetHeight;
+          requestAnimationFrame(function () {
+            inner.style.transform = voteYes ? "translateX(120%) rotate(12deg)" : "translateX(-120%) rotate(-12deg)";
+            inner.style.opacity = "0";
+          });
+
+          var done = false;
+          function finish() {
+            if (done) return;
+            done = true;
+            inner.removeEventListener("transitionend", onFlyEnd);
+            submitIdeaVote(voteYes);
+          }
+          function onFlyEnd(e) {
+            if (e.target !== inner) return;
+            if (e.propertyName === "transform" || e.propertyName === "opacity") finish();
+          }
+          inner.addEventListener("transitionend", onFlyEnd);
+          setTimeout(finish, 450);
+        }
+
+        var onMouseMove = function (e) { onMove(e.clientX); };
+        var onMouseUp = function (e) { onUp(e.clientX); };
+        function onTouchMove(e) { if (e.touches && e.touches.length > 0) onMove(e.touches[0].clientX); }
+        function onTouchEnd(e) { if (e.changedTouches && e.changedTouches.length > 0) onUp(e.changedTouches[0].clientX); }
+
+        document.addEventListener("mousemove", onMouseMove);
+        document.addEventListener("mouseup", onMouseUp);
+        document.addEventListener("touchmove", onTouchMove, { passive: true });
+        document.addEventListener("touchend", onTouchEnd, { passive: true });
+      }
+
+      card.addEventListener("mousedown", function (e) {
+        if (e.button !== 0) return;
+        var track = document.getElementById("ideaSwipeTrack");
+        if (!track || !track.contains(e.target)) return;
+        onPointerDown(e.clientX, false);
+      });
+      card.addEventListener("touchstart", function (e) {
+        if (e.touches && e.touches.length > 0) {
+          var track = document.getElementById("ideaSwipeTrack");
+          if (!track || !track.contains(e.target)) return;
+          onPointerDown(e.touches[0].clientX, true);
+        }
+      }, { passive: true });
+    }
+
+    function initEmployeePage() {
+      ideaYesCount = 0;
+      ideaSkipCount = 0;
+      ideaNoCount = 0;
+      $("#ideaVoteStats").text("Yes: 0 | Skip: 0 | No: 0").show();
+      $("#ideaVoteLeftBtn").on("click", function () { submitIdeaVote(false); });
+      $("#ideaVoteRightBtn").on("click", function () { submitIdeaVote(true); });
+      $("#ideaSkipBtn").on("click", function () { skipCurrentIdea(); });
+      bindSwipeIdeaVoting();
+      loadNextIdea();
+    }
+
+    $(document).ready(function () {
+      $("#btnAdmin").on("click", function () { window.location.href = "admin-pin.html"; });
+      $("#btnLogout").on("click", logout);
+      checkAccessAndInit();
+    });
+  </script>
+</body>
+</html>

@@ -6,183 +6,472 @@
   <title>Employee Dashboard</title>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
   <style>
-    :root {
-      --deep-slate: #2D3E50;
-      --bright-azure: #3498DB;
-      --off-white: #EAF3FF;
-      --card-border: #dce4ea;
-    }
-
-    * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
-      background: var(--off-white);
-      color: var(--deep-slate);
-      font-family: Arial, sans-serif;
-      padding: 24px;
-    }
-
-    .topbar {
-      max-width: 980px;
-      margin: 0 auto 16px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-    }
-
-    h1 { margin: 0; }
-
-    .actions {
-      display: flex;
-      gap: 8px;
-    }
-
-    button {
-      border: none;
-      border-radius: 8px;
-      padding: 10px 14px;
-      font-weight: 700;
-      cursor: pointer;
-      background: var(--bright-azure);
-      color: #fff;
-    }
-
-    #btnLogout {
-      background: #e74c3c;
-    }
-
-    #voteLeftBtn {
-      background: #dc2626;
-    }
-
-    #voteRightBtn {
-      background: #16a34a;
-    }
-
-    #skipBtn {
-      background: #6b7280;
-    }
-
-    .grid {
-      max-width: 980px;
-      margin: 0 auto;
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 14px;
-    }
-
-    .card {
-      background: #fff;
-      border: 1px solid var(--card-border);
-      border-radius: 10px;
-      padding: 16px;
-      box-shadow: 0 8px 18px rgba(45, 62, 80, 0.12);
-    }
-
-    .card h2 { margin: 0 0 10px; }
-
-    textarea {
-      width: 100%;
-      border: 1px solid #d7dee3;
-      border-radius: 8px;
-      padding: 10px;
-      resize: vertical;
-    }
-
-    #suggestionsCards .item {
-      border: 1px solid #e1e8ed;
-      border-radius: 8px;
-      padding: 10px;
-      margin-top: 10px;
-      background: #fff;
-    }
-
-    .small {
-      font-size: 13px;
-      color: #5f7286;
-    }
-
-    .subheader {
-      margin: 0 0 10px;
-      font-size: 14px;
-      color: #5f7286;
-    }
-
-    .vote-actions {
-      margin-top: 8px;
-      display: flex;
-      gap: 8px;
-    }
-
-    #progressText { margin-bottom: 10px; }
-
-    #questionCard {
-      min-height: 160px;
-      border: 1px solid #d7dee3;
-      border-radius: 8px;
-      padding: 14px;
-      background: #fff;
-    }
-
-    .vote-controls {
-      margin-top: 10px;
-      display: flex;
-      gap: 8px;
-      justify-content: center;
-      flex-wrap: wrap;
-    }
-
-    .msg {
-      margin-top: 8px;
-      min-height: 20px;
-      font-size: 14px;
-    }
-
-    #errorMsg { color: #b00020; }
-    #confirmMsg { color: #166534; }
+    :root{
+  --bg1:#0f172a;
+  --bg2:#1e293b;
+  --border-topbar: rgba(255, 255, 255, 0.22);
+  --panel:#ffffff;
+  --border:#334155;
+  --text:#f1f5f9;
+  --muted:#94a3b8;
+  --card-text:#0f172a;
+  --card-bg: rgba(248, 250, 252, 0.97);
+  --red:#ef4444;
+  --green:#22c55e;
+  --primary:#4f46e5;
+  --primary2:#2563eb;
+  --shadow2: 0 10px 22px rgba(15, 23, 42, 0.08);
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+*{ box-sizing: border-box; }
+body{
+  margin:0;
+  min-height:100vh;
+  color:var(--text);
+  font-family: "Segoe UI", Roboto, Arial, sans-serif;
+  visibility: hidden;
+  background:
+    radial-gradient(1100px 600px at 15% 15%, var(--bg2), transparent 60%),
+    radial-gradient(900px 500px at 85% 25%, #1e3a5f, transparent 55%),
+    linear-gradient(180deg, var(--bg1), #0f172a);
+}
+.topbar{
+  position: sticky;
+  top:0;
+  z-index: 50;
+  background: rgba(15, 23, 42, 0.94);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border-topbar);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+}
+.topbarInner{
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+.brand{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 900;
+  letter-spacing: .2px;
+  flex-shrink: 0;
+}
+.logoDot{
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--primary), #60a5fa);
+  box-shadow: 0 10px 18px rgba(79,70,229,0.20);
+}
+.navLinks{
+  display: flex;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+  justify-content: center;
+  flex-wrap: nowrap;
+  font-size: 14px;
+}
+.navLinks a{
+  color: var(--muted);
+  text-decoration: none;
+  padding: 8px 14px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  font-weight: 800;
+  transition: 0.2s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.navLinks a:hover{
+  color: var(--text);
+  background: rgba(79,70,229,0.08);
+}
+.navLinks a.active{
+  color: var(--primary);
+  background: rgba(79,70,229,0.10);
+  box-shadow: inset 0 0 0 1px rgba(79,70,229,0.25);
+}
+.navLinks a.nav-locked{
+  opacity: 0.6;
+  pointer-events: none;
+  cursor: not-allowed;
+}
+.actions, .topbar-actions{
+  flex-shrink: 0;
+  min-width: 280px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: nowrap;
+}
+.container{ max-width: 900px; margin: 26px auto; padding: 0 16px; }
+h1{ margin: 0 0 10px 0; font-size: 38px; font-weight: 900; letter-spacing: -0.5px; }
+.subtext{ margin: 0 0 18px 0; color: var(--muted); font-size: 14px; line-height: 1.55; }
+.card{
+  background: var(--card-bg);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 18px;
+  padding: 16px;
+  box-shadow: var(--shadow-card);
+  margin-bottom: 14px;
+  color: var(--card-text);
+}
+.card .subtext, .card .small, .card .subheader{ color: #64748b; }
+.cardHeader{ display:flex; align-items:flex-start; justify-content: space-between; gap: 10px; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+.cardTitle{ font-size: 18px; font-weight:900; margin:0; }
+.pill{ font-size:12px; color: var(--muted); border:1px solid var(--border); padding: 6px 10px; border-radius: 999px; background: rgba(255,255,255,0.85); white-space: nowrap; }
+.btnRow{ display:flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+button{
+  border:none;
+  border-radius: 12px;
+  padding: 11px 14px;
+  font-weight: 900;
+  cursor:pointer;
+  white-space: nowrap;
+  transition: 0.2s ease;
+}
+button:hover{ transform: translateY(-1px); box-shadow: 0 12px 20px rgba(15,23,42,0.14); }
+button:active{ transform: translateY(0); }
+textarea{
+  width:100%;
+  min-height:90px;
+  border-radius:12px;
+  border:1.5px solid var(--border);
+  background: rgba(255,255,255,0.95);
+  color: var(--text);
+  padding:10px 12px;
+  resize: vertical;
+  transition: 0.2s ease;
+}
+textarea:focus{
+  outline:none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(79,70,229,0.15);
+}
+.small{ font-size: 12px; color: var(--muted); font-weight: 700; }
+/* Dashboard page */
+.actions{ display: flex; gap: 10px; flex-wrap: nowrap; }
+#btnAdmin{ background: rgba(255,255,255,0.95); color: #0f172a; border: 1px solid rgba(255,255,255,0.4); }
+#btnLogout{ background: var(--red); color: #fff; }
+#voteLeftBtn{ background: var(--red); color: #fff; }
+#voteRightBtn{ background: var(--green); color: #111827; }
+#skipBtn{ background: rgba(100,116,139,0.18); color: #111827; border: 1px solid rgba(100,116,139,0.30); }
+#btnSubmitSuggestion{ background: var(--primary); color: #fff; }
+.grid{
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: auto auto auto;
+  gap: 0;
+  padding: 28px 20px 32px;
+  min-height: calc(100vh - 120px);
+}
+#voteSection.card{
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  margin-bottom: 8px;
+}
+#voteSection .subheader{ margin-bottom: 6px; }
+#progressText{ margin-bottom: 6px; }
+.vote-box{
+  flex: 1;
+  min-height: 480px;
+  margin-top: 8px;
+  border-radius: 18px;
+  overflow: hidden;
+  background: var(--card-bg);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.5), 0 4px 20px rgba(0, 0, 0, 0.15);
+  color: var(--card-text);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+#questionCardInner{
+  flex: 1;
+  min-height: 240px;
+  cursor: grab;
+  user-select: none;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+.vote-stats{
+  flex-shrink: 0;
+  padding: 14px 24px 12px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #64748b;
+  text-align: center;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  background: rgba(255, 255, 255, 0.35);
+}
+#questionCardInner:active{ cursor: grabbing; }
+body.swipe-dragging{ cursor: grabbing !important; }
+body.swipe-dragging *{ cursor: grabbing !important; }
+.vote-box .vote-controls{
+  flex-shrink: 0;
+  margin-top: 0;
+  padding: 16px 20px 18px;
+  gap: 14px;
+  justify-content: center;
+  flex-wrap: wrap;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  background: rgba(255, 255, 255, 0.4);
+}
+.vote-box .vote-controls button{ padding: 14px 24px; font-size: 15px; min-width: 100px; }
+.card h2{ margin: 0 0 10px; font-size: 18px; font-weight: 900; }
+#suggestionsSection.card, #feedbackSection.card{
+  padding: 18px;
+  margin-top: 28px;
+}
+#suggestionsSection.card h2, #feedbackSection.card h2{ font-size: 20px; }
+#suggestionsSection .subheader, #feedbackSection .subheader{ font-size: 15px; }
+#feedbackSection.card{
+  align-self: start;
+}
+#feedbackSection textarea{
+  min-height: 90px;
+  max-height: 200px;
+  color: #0f172a;
+}
+#suggestionsCards .item{
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 14px;
+  padding: 14px;
+  margin-top: 12px;
+  background: rgba(255, 255, 255, 0.7);
+  font-size: 14px;
+}
+#suggestionsCards .item:first-child{ margin-top: 0; }
+.suggestions-cards-scroll{
+  max-height: 340px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 6px;
+}
+.suggestions-cards-scroll::-webkit-scrollbar{
+  width: 8px;
+}
+.suggestions-cards-scroll::-webkit-scrollbar-track{
+  background: rgba(0, 0, 0, 0.06);
+  border-radius: 4px;
+}
+.suggestions-cards-scroll::-webkit-scrollbar-thumb{
+  background: rgba(100, 116, 139, 0.4);
+  border-radius: 4px;
+}
+.suggestions-cards-scroll::-webkit-scrollbar-thumb:hover{
+  background: rgba(100, 116, 139, 0.6);
+}
+.subheader{ margin: 0 0 12px; font-size: 14px; color: var(--muted); }
+.vote-actions{ margin-top: 8px; display: flex; gap: 8px; }
+.swipe-track{
+  position: relative;
+  flex: 1;
+  min-height: 180px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.swipe-card-inner{
+  position: relative;
+  z-index: 1;
+  transition: transform 0.2s ease-out;
+  flex: 1;
+  min-height: 140px;
+  display: flex;
+  flex-direction: column;
+  will-change: transform;
+}
+.swipe-card-inner.dragging{ transition: none; }
+.swipe-card-inner.swipe-fly-away{
+  transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.3s ease-out;
+}
+.swipe-card-inner h3{ font-size: 22px; line-height: 1.4; }
+.swipe-hint{
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  font-weight: 900;
+  font-size: 22px;
+  letter-spacing: 0.05em;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 0;
+  transition: opacity 0.15s ease;
+  border-radius: 12px;
+  padding: 10px 18px;
+}
+.swipe-hint-left{ left: 24px; color: var(--red); }
+.swipe-hint-right{ right: 24px; color: var(--green); }
+.vote-controls{ margin-top: 10px; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.vote-done-state{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 280px;
+  padding: 40px 32px;
+  text-align: center;
+}
+.vote-done-state .vote-done-title{
+  margin: 0 0 16px 0;
+  font-size: 26px;
+  font-weight: 900;
+  color: var(--card-text);
+  line-height: 1.3;
+}
+.vote-done-state .vote-done-badge{
+  margin: 0;
+  font-size: 15px;
+  color: #64748b;
+  line-height: 1.5;
+  max-width: 320px;
+}
+.msg{ margin-top: 8px; min-height: 20px; font-size: 14px; font-weight: 700; }
+#errorMsg{ color: var(--red); }
+#confirmMsg{ color: #166534; }
+.tutorial-overlay{
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.tutorial-overlay.hidden{ display: none; }
+.tutorial-card{
+  background: var(--card-bg);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 18px;
+  padding: 28px;
+  max-width: 420px;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
+  color: var(--card-text);
+}
+.tutorial-card h3{
+  margin: 0 0 16px 0;
+  font-size: 22px;
+  font-weight: 900;
+}
+.tutorial-card p{
+  margin: 0 0 14px 0;
+  font-size: 15px;
+  line-height: 1.5;
+  color: #475569;
+}
+.tutorial-card ul{
+  margin: 0 0 20px 0;
+  padding-left: 22px;
+}
+.tutorial-card li{
+  margin-bottom: 8px;
+  font-size: 15px;
+  line-height: 1.45;
+  color: #334155;
+}
+.tutorial-card .btn-tutorial{
+  display: block;
+  width: 100%;
+  padding: 14px 20px;
+  border: none;
+  border-radius: 12px;
+  background: var(--primary);
+  color: #fff;
+  font-weight: 900;
+  font-size: 15px;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+.tutorial-card .btn-tutorial:hover{
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(79, 70, 229, 0.35);
+}
   </style>
 </head>
 <body>
   <div class="topbar">
-    <h1>Dashboard</h1>
-    <div class="actions">
-      <button id="btnAdmin" type="button">Admin</button>
-      <button id="btnLogout" type="button">Logout</button>
+    <div class="topbarInner">
+      <div class="brand">
+        <div class="logoDot"></div>
+        <div>Employee Feedback</div>
+      </div>
+      <div class="navLinks">
+        <a class="active" href="dashboard.html">Dashboard</a>
+        <a href="employee.html" id="navEmployee" class="nav-requires-vote" title="">Employee</a>
+        <a href="ideasubmit.html" id="navSubmitIdea" class="nav-requires-vote" title="">Submit Idea</a>
+      </div>
+      <div class="actions topbar-actions">
+        <button id="btnAdmin" type="button">Admin</button>
+        <button id="btnLogout" type="button">Logout</button>
+      </div>
     </div>
   </div>
 
   <div class="grid" id="mainGrid">
     <section class="card" id="voteSection">
       <h2>Vote Here!</h2>
-      <p class="subheader">Review and vote on site improvements submitted by employees and administrators.</p>
+      <p class="subheader">Review and vote on questions from administrators. You must complete all questions before accessing the Employee or Submit Idea tabs.</p>
       <div id="progressText" class="small"></div>
-      <div id="questionCard"></div>
-      <div class="vote-controls">
-        <button id="voteLeftBtn" type="button">Left</button>
-        <button id="skipBtn" type="button">Skip</button>
-        <button id="voteRightBtn" type="button">Right</button>
+      <div class="vote-box">
+        <div id="questionCardInner"></div>
+        <div class="vote-stats" id="voteStats"></div>
+        <div class="vote-controls">
+          <button id="voteLeftBtn" type="button">No</button>
+          <button id="skipBtn" type="button">Skip</button>
+          <button id="voteRightBtn" type="button">Yes</button>
+        </div>
       </div>
       <div id="errorMsg" class="msg" style="display:none;"></div>
       <div id="confirmMsg" class="msg" style="display:none;"></div>
     </section>
 
-    <section class="card" id="suggestionsSection">
-      <h2>Suggestions</h2>
-      <p class="subheader">Review community polls and employee feedback on recent suggestions.</p>
-      <div id="suggestionsCards"></div>
-    </section>
-
     <section class="card" id="feedbackSection">
       <h2>Anonymous Feedback</h2>
-      <p class="subheader">Submit your own suggestions for workplace improvements here. (Optional)</p>
-      <textarea id="suggestionText" rows="4" placeholder="Share your suggestion..."></textarea>
+      <p class="subheader">Optional. Share any inquiries about the workplace, or any comments, concerns, or feedback you have as an employee.</p>
+      <textarea id="suggestionText" rows="4" placeholder="Share your feedback..."></textarea>
       <div style="margin-top:8px;">
         <button id="btnSubmitSuggestion" type="button">Submit</button>
       </div>
       <div id="suggestionMsg" class="msg"></div>
     </section>
+
+    <section class="card" id="suggestionsSection">
+      <h2>Employee Suggestions</h2>
+      <p class="subheader">Overview of suggestions submitted by other employees. Vote on ideas in the Employee tab to share your opinion.</p>
+      <div id="suggestionsCardsWrap" class="suggestions-cards-scroll">
+        <div id="suggestionsCards"></div>
+      </div>
+    </section>
+  </div>
+
+  <div id="tutorialOverlay" class="tutorial-overlay hidden">
+    <div class="tutorial-card">
+      <h3>Quick tip: How to vote</h3>
+      <p>Answer questions quickly with swipes or buttons:</p>
+      <ul>
+        <li><strong>Swipe right</strong> or tap <strong>Yes</strong> to agree</li>
+        <li><strong>Swipe left</strong> or tap <strong>No</strong> to disagree</li>
+        <li>Tap <strong>Skip</strong> when you want to skip a question</li>
+      </ul>
+      <button type="button" class="btn-tutorial" id="tutorialDismiss">Got it</button>
+    </div>
   </div>
 
   <script src="voting.js"></script>
@@ -204,6 +493,29 @@
       window.location.href = "login.html";
     }
 
+    function setNavVoteComplete(completed) {
+      var emp = document.getElementById("navEmployee");
+      var idea = document.getElementById("navSubmitIdea");
+      var title = completed ? "" : "Complete the Vote Here section first to access this page.";
+      if (emp) {
+        emp.classList.toggle("nav-locked", !completed);
+        emp.title = title;
+        emp.removeEventListener("click", preventNavClick);
+        if (!completed) emp.addEventListener("click", preventNavClick);
+      }
+      if (idea) {
+        idea.classList.toggle("nav-locked", !completed);
+        idea.title = title;
+        idea.removeEventListener("click", preventNavClick);
+        if (!completed) idea.addEventListener("click", preventNavClick);
+      }
+    }
+    function preventNavClick(e) {
+      e.preventDefault();
+      var v = document.getElementById("voteSection");
+      if (v) v.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
     function showAccessDenied() {
       document.body.innerHTML = "<h1 style='font-family:Arial,sans-serif;text-align:center;margin-top:40px;'>Access Denied</h1>";
     }
@@ -221,41 +533,47 @@
       if (vote) {
         grid.appendChild(vote);
       }
-      if (suggestions) {
-        grid.appendChild(suggestions);
-      }
       if (feedback) {
         grid.appendChild(feedback);
       }
+      if (suggestions) {
+        grid.appendChild(suggestions);
+      }
     }
 
+    // Dashboard Suggestions section: Ideas table + IdeasVote only (NOT Suggestions table)
     function loadSuggestions() {
       $.ajax({
         type: "POST",
-        url: apiUrl("GetSuggestions"),
+        url: apiUrl("GetIdeas"),
         contentType: "application/json; charset=utf-8",
         data: "{}",
         dataType: "json",
         success: function (res) {
           if (!res || typeof res.d === "undefined") {
-            $("#suggestionsCards").html("<p>Unable to load suggestions.</p>");
+            $("#suggestionsCards").html("<p>Unable to load ideas.</p>");
             return;
           }
 
           const rows = res.d || [];
           if (!rows.length) {
-            $("#suggestionsCards").html("<p>No suggestions yet.</p>");
+            $("#suggestionsCards").html("<p>No submitted ideas yet.</p>");
             return;
           }
 
           let html = "";
-          rows.forEach(function (s) {
+          rows.forEach(function (idea) {
+            var text = idea.IdeaText || idea.ideaText || "";
+            var created = idea.CreatedDate || idea.createdDate || "";
+            var yesCount = Number(idea.UpVotes !== undefined ? idea.UpVotes : idea.upVotes) || 0;
+            var noCount = Number(idea.DownVotes !== undefined ? idea.DownVotes : idea.downVotes) || 0;
             html += "<div class='item'>"
-              + "<div class='small'>" + escapeHtml(s.CreatedDate || "") + "</div>"
-              + "<div style='margin-top:6px;'>" + escapeHtml(s.SuggestionText || "") + "</div>"
-              + "<div class='vote-actions'>"
-              + "<span class='small'>👍 " + (s.UpVotes || 0) + "</span>"
-              + "<span class='small'>👎 " + (s.DownVotes || 0) + "</span>"
+              + "<div class='small'>" + escapeHtml(created) + "</div>"
+              + "<div style='margin-top:6px;'>" + escapeHtml(text) + "</div>"
+              + "<div class='vote-actions' style='margin-top:8px;'>"
+              + "<span class='small'>👍 " + yesCount + "</span>"
+              + "<span class='small'>👎 " + noCount + "</span>"
+              + "<span class='small'><strong>Total votes:</strong> " + (yesCount + noCount) + "</span>"
               + "</div>"
               + "</div>";
           });
@@ -263,7 +581,7 @@
           $("#suggestionsCards").html(html);
         },
         error: function () {
-          $("#suggestionsCards").html("<p>Error loading suggestions.</p>");
+          $("#suggestionsCards").html("<p>Error loading ideas.</p>");
         }
       });
     }
@@ -326,13 +644,24 @@
             return;
           }
           if (!access.verified) {
+            document.body.style.visibility = "visible";
             showAccessDenied();
             return;
           }
 
+          document.body.style.visibility = "visible";
           loadSuggestions();
+          setNavVoteComplete(sessionStorage.getItem("voteRequirementComplete") === "1");
+          window.onVoteRequirementKnown = function (completed) {
+            setNavVoteComplete(completed);
+          };
           if (typeof initVotingUI === "function") {
             initVotingUI();
+          }
+          showTutorial();
+          if (window.location.search.indexOf("mustVote=1") >= 0) {
+            var msg = document.getElementById("voteSection");
+            if (msg) msg.scrollIntoView({ behavior: "smooth", block: "start" });
           }
         },
         error: function () {
@@ -358,11 +687,22 @@
       });
     }
 
+    function showTutorial() {
+      var el = document.getElementById("tutorialOverlay");
+      if (el) el.classList.remove("hidden");
+    }
+
+    function dismissTutorial() {
+      var el = document.getElementById("tutorialOverlay");
+      if (el) el.classList.add("hidden");
+    }
+
     $(document).ready(function () {
       enforceSectionOrder();
       $("#btnSubmitSuggestion").on("click", submitSuggestion);
       $("#btnAdmin").on("click", function () { window.location.href = "admin-pin.html"; });
       $("#btnLogout").on("click", logout);
+      $("#tutorialDismiss").on("click", dismissTutorial);
       checkAccessAndInit();
     });
   </script>

@@ -2,80 +2,99 @@
 <html>
 <head>
   <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Admin PIN</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@600;700;800&family=Montserrat:wght@700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
   <style>
-    :root {
-      --deep-slate: #2D3E50;
-      --bright-azure: #3498DB;
-      --off-white: #EAF3FF;
-    }
-
-    body {
-      margin: 0;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: var(--off-white);
-      font-family: 'Open Sans', Arial, sans-serif;
-      color: var(--deep-slate);
-    }
-
-    .pin-card {
-      width: 420px;
-      max-width: calc(100vw - 40px);
-      background: #fff;
-      border: 1px solid #dce4ea;
-      border-radius: 8px;
-      padding: 24px;
-      box-shadow: 0 10px 24px rgba(45, 62, 80, 0.16);
-      text-align: center;
-    }
-
-    h1 {
-      margin: 0 0 8px;
-      font-family: 'Inter', 'Montserrat', Arial, sans-serif;
-      font-size: 28px;
-      font-weight: 800;
-    }
-
-    p {
-      margin: 0 0 16px;
-      color: #5f7286;
-    }
-
-    input {
-      width: 100%;
-      box-sizing: border-box;
-      border: 1px solid #d7dee3;
-      border-radius: 8px;
-      padding: 12px;
-      font-size: 16px;
-      text-align: center;
-      margin-bottom: 12px;
-    }
-
-    button {
-      width: 100%;
-      border: none;
-      border-radius: 8px;
-      background: var(--bright-azure);
-      color: #fff;
-      font-weight: 600;
-      padding: 12px;
-      cursor: pointer;
-    }
-
-    #msg {
-      margin-top: 12px;
-      min-height: 20px;
-      font-size: 14px;
-      color: #b00020;
-    }
+:root{
+  --bg1:#0f172a;
+  --bg2:#1e293b;
+  --text: #f1f5f9;
+  --muted: #94a3b8;
+  --primary: #4f46e5;
+  --red: #ef4444;
+  --card-text: #0f172a;
+  --card-bg: rgba(248, 250, 252, 0.97);
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.06);
+  --border: rgba(0, 0, 0, 0.08);
+}
+*{ box-sizing: border-box; }
+body{
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text);
+  font-family: "Segoe UI", Roboto, Arial, sans-serif;
+  visibility: hidden;
+  background:
+    radial-gradient(1100px 600px at 15% 15%, var(--bg2), transparent 60%),
+    radial-gradient(900px 500px at 85% 25%, #1e3a5f, transparent 55%),
+    linear-gradient(180deg, var(--bg1), #0f172a);
+}
+.pin-card{
+  width: 420px;
+  max-width: calc(100vw - 40px);
+  background: var(--card-bg);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 18px;
+  padding: 24px;
+  box-shadow: var(--shadow-card);
+  text-align: center;
+  color: var(--card-text);
+}
+.pin-card h1{
+  margin: 0 0 8px;
+  font-size: 28px;
+  font-weight: 900;
+  letter-spacing: -0.5px;
+}
+.pin-card p{
+  margin: 0 0 16px;
+  color: #64748b;
+  font-size: 14px;
+}
+.pin-card input{
+  width: 100%;
+  box-sizing: border-box;
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  padding: 12px;
+  font-size: 16px;
+  text-align: center;
+  margin-bottom: 12px;
+  background: rgba(255,255,255,0.95);
+  transition: 0.2s ease;
+}
+.pin-card input:focus{
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(79,70,229,0.15);
+}
+.pin-card button{
+  width: 100%;
+  border: none;
+  border-radius: 12px;
+  background: var(--primary);
+  color: #fff;
+  font-weight: 900;
+  padding: 12px;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+.pin-card button:hover{
+  transform: translateY(-1px);
+  box-shadow: 0 12px 20px rgba(15,23,42,0.14);
+}
+#msg{
+  margin-top: 12px;
+  min-height: 20px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--red);
+}
   </style>
 </head>
 <body>
@@ -116,8 +135,9 @@
             return;
           }
 
+          document.body.style.visibility = "visible";
           if (!access.verified) {
-            document.body.innerHTML = "<h1 style='font-family:Inter,Arial,sans-serif;text-align:center;margin-top:40px;'>Access Denied</h1>";
+            document.body.innerHTML = "<h1 style='font-family:\"Segoe UI\",Roboto,Arial,sans-serif;text-align:center;margin-top:40px;'>Access Denied</h1>";
             return;
           }
         },

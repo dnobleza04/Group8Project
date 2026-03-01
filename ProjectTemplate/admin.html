@@ -6,118 +6,462 @@
   <title>Admin Dashboard</title>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
   <style>
-    :root {
-      --deep-slate: #2D3E50;
-      --bright-azure: #3498DB;
-      --off-white: #EAF3FF;
-      --card-border: #dce4ea;
-    }
-
-    body {
-      margin: 0;
-      min-height: 100vh;
-      background: var(--off-white);
-      color: var(--deep-slate);
-      font-family: Arial, sans-serif;
-      padding: 24px;
-    }
-
-    .topbar {
-      max-width: 980px;
-      margin: 0 auto 14px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
-    }
-
-    h1 { margin: 0; }
-
-    .top-actions {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    button {
-      border: none;
-      border-radius: 8px;
-      padding: 10px 14px;
-      font-weight: 700;
-      cursor: pointer;
-      background: var(--bright-azure);
-      color: #fff;
-    }
-
-    #btnLogout { background: #e74c3c; }
-
-    .card {
-      max-width: 980px;
-      margin: 0 auto;
-      background: #fff;
-      border: 1px solid var(--card-border);
-      border-radius: 10px;
-      padding: 16px;
-      box-shadow: 0 8px 18px rgba(45, 62, 80, 0.12);
-    }
-
-    .metric {
-      padding: 10px;
-      border: 1px solid #e1e8ed;
-      border-radius: 8px;
-      margin-bottom: 10px;
-      background: #fff;
-    }
-
-    .muted {
-      color: #5f7286;
-      font-size: 13px;
-    }
-
-    ul {
-      margin: 8px 0 0;
-      padding-left: 18px;
-    }
-
-    li { margin: 6px 0; }
-
-    #statusMsg {
-      margin: 8px 0 0;
-      color: #b00020;
-      min-height: 20px;
-    }
+    :root{
+  --bg1:#0f172a;
+  --bg2:#1e293b;
+  --border-topbar: rgba(255, 255, 255, 0.22);
+  --text:#f1f5f9;
+  --muted:#94a3b8;
+  --card-text:#0f172a;
+  --card-bg: rgba(248, 250, 252, 0.97);
+  --red:#ef4444;
+  --primary:#4f46e5;
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.06);
+  --border: rgba(0, 0, 0, 0.08);
+}
+*{ box-sizing: border-box; }
+body{
+  margin:0;
+  min-height:100vh;
+  color:var(--text);
+  font-family: "Segoe UI", Roboto, Arial, sans-serif;
+  visibility: hidden;
+  background:
+    radial-gradient(1100px 600px at 15% 15%, var(--bg2), transparent 60%),
+    radial-gradient(900px 500px at 85% 25%, #1e3a5f, transparent 55%),
+    linear-gradient(180deg, var(--bg1), #0f172a);
+}
+.topbar{
+  position: sticky;
+  top:0;
+  z-index: 50;
+  background: rgba(15, 23, 42, 0.94);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border-topbar);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+}
+.topbarInner{
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+.brand{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 900;
+  letter-spacing: .2px;
+  flex-shrink: 0;
+}
+.logoDot{
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--primary), #60a5fa);
+  box-shadow: 0 10px 18px rgba(79,70,229,0.20);
+}
+.navLinks{
+  display: flex;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+  justify-content: center;
+  flex-wrap: nowrap;
+  font-size: 14px;
+}
+.navLinks a{
+  color: var(--muted);
+  text-decoration: none;
+  padding: 8px 14px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  font-weight: 800;
+  transition: 0.2s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.navLinks a:hover{
+  color: var(--text);
+  background: rgba(79,70,229,0.08);
+}
+.navLinks a.active{
+  color: var(--primary);
+  background: rgba(79,70,229,0.10);
+  box-shadow: inset 0 0 0 1px rgba(79,70,229,0.25);
+}
+.top-actions, .topbar-actions{
+  flex-shrink: 0;
+  min-width: 280px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: nowrap;
+}
+.container{
+  max-width: 900px;
+  margin: 26px auto;
+  padding: 0 16px;
+}
+h1{
+  margin: 0 0 10px 0;
+  font-size: 38px;
+  font-weight: 900;
+  letter-spacing: -0.5px;
+}
+.subtext{
+  margin: 0 0 18px 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.55;
+}
+.card{
+  background: var(--card-bg);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 18px;
+  padding: 16px;
+  box-shadow: var(--shadow-card);
+  margin-bottom: 14px;
+  color: var(--card-text);
+}
+.card .muted{ color: #64748b; }
+.cardHeader{
+  display:flex;
+  align-items:flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.cardTitle{
+  font-size: 18px;
+  font-weight:900;
+  margin:0;
+}
+.pill{
+  font-size:12px;
+  color: var(--muted);
+  border:1px solid var(--border);
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.85);
+  white-space: nowrap;
+}
+.pill-label{ margin: 0 0 12px 0; }
+.pill-label .pill{ font-size: 11px; }
+.ideas-sort-wrap{
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+.ideas-sort-wrap label{ color: var(--muted); font-size: 13px; }
+.ideas-sort-select{
+  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.95);
+  color: var(--card-text);
+  cursor: pointer;
+  min-width: 180px;
+}
+.prompts-header{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+.pill-active{
+  font-size: 10px;
+  padding: 4px 8px;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+.pill-retired{
+  font-size: 10px;
+  padding: 4px 8px;
+  margin-left: 8px;
+  vertical-align: middle;
+  background: rgba(148, 163, 184, 0.5);
+  color: #64748b;
+}
+.btnRow{
+  display:flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+}
+button{
+  border:none;
+  border-radius: 12px;
+  padding: 11px 14px;
+  font-weight: 900;
+  cursor:pointer;
+  white-space: nowrap;
+  transition: 0.2s ease;
+}
+button:hover{
+  transform: translateY(-1px);
+  box-shadow: 0 12px 20px rgba(15,23,42,0.14);
+}
+.btnDelete{
+  flex-shrink: 0;
+  padding: 8px 14px;
+  font-size: 13px;
+  background: var(--red);
+  color: #fff;
+}
+.btnDelete:hover{ opacity: 0.95; }
+.btnAddQuestion{
+  background: var(--primary);
+  color: #fff;
+}
+.btnAddQuestion:hover{ opacity: 0.95; }
+.btnRetire{
+  flex-shrink: 0;
+  padding: 8px 14px;
+  font-size: 13px;
+  background: #f59e0b;
+  color: #fff;
+}
+.btnRetire:hover{ opacity: 0.95; }
+.btnActivate{
+  flex-shrink: 0;
+  padding: 8px 14px;
+  font-size: 13px;
+  background: var(--red);
+  color: #fff;
+}
+.btnActivate:hover{ opacity: 0.95; }
+button:active{
+  transform: translateY(0);
+}
+/* Admin page */
+.admin-two-col{
+  display: flex;
+  gap: 20px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+.admin-two-col .card{
+  flex: 1;
+  min-width: 280px;
+}
+.top-actions{ display: flex; gap: 10px; flex-wrap: wrap; }
+.analytics-subhead{
+  margin: 16px 0 8px 0;
+  font-size: 16px;
+  font-weight: 900;
+  color: var(--card-text);
+}
+.analytics-subhead:first-of-type{ margin-top: 0; }
+.metric{
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  margin-bottom: 10px;
+  background: rgba(255,255,255,0.85);
+}
+.analytics-bar-wrap{
+  margin-bottom: 14px;
+}
+.analytics-bar-wrap:last-child{ margin-bottom: 0; }
+.analytics-bar-label{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+  font-size: 14px;
+  color: var(--card-text);
+}
+.analytics-bar-label strong{ font-weight: 700; }
+.analytics-bar-track{
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(0,0,0,0.08);
+  overflow: hidden;
+}
+.analytics-bar-fill{
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--primary), #6366f1);
+  transition: width 0.35s ease;
+  min-width: 0;
+}
+.analytics-bar-fill.muted{ background: linear-gradient(90deg, #94a3b8, #64748b); }
+.analytics-topic-bar{ margin-bottom: 10px; }
+.analytics-topic-bar .analytics-bar-label{ margin-bottom: 4px; font-size: 13px; }
+.analytics-topic-bar .analytics-bar-track{ height: 8px; }
+.top-concern-question{
+  font-size: 14px;
+  color: var(--card-text);
+  line-height: 1.4;
+}
+.muted{ color: var(--muted); font-size: 13px; }
+#btnAdmin{ background: rgba(255,255,255,0.95); color: #0f172a; border: 1px solid rgba(255,255,255,0.4); }
+#btnLogout{ background: var(--red); color: #fff; }
+ul{ margin: 8px 0 0; padding-left: 18px; }
+li{ margin: 6px 0; }
+#statusMsg{ margin-top: 8px; color: var(--red); min-height: 20px; font-size: 13px; font-weight: 700; }
+.subheader{ margin: 0 0 12px; font-size: 14px; color: #64748b; }
+.small{ font-size: 12px; color: #64748b; font-weight: 700; }
+#suggestionsSection.card{
+  margin-top: 20px;
+}
+#ideasList{
+  min-height: 40px;
+  max-height: 320px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+#promptsList{
+  min-height: 40px;
+  max-height: 400px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+#suggestionsCards{
+  min-height: 60px;
+  max-height: 320px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+#suggestionsCards .item{
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px;
+  margin-top: 12px;
+  background: rgba(255, 255, 255, 0.7);
+  font-size: 14px;
+}
+#suggestionsCards .item:first-child{ margin-top: 0; }
+.vote-actions{ margin-top: 8px; display: flex; gap: 8px; }
   </style>
 </head>
 <body>
   <div class="topbar">
-    <h1>Admin Dashboard</h1>
-    <div class="top-actions">
-      <button id="btnBack" type="button">Back to Dashboard</button>
-      <button id="btnLogout" type="button">Logout</button>
+    <div class="topbarInner">
+      <div class="brand">
+        <div class="logoDot"></div>
+        <div>Admin Dashboard</div>
+      </div>
+      <div class="navLinks">
+        <a href="dashboard.html">Dashboard</a>
+        <a href="employee.html">Employee</a>
+        <a href="ideasubmit.html">Submit Idea</a>
+      </div>
+      <div class="top-actions topbar-actions">
+        <button id="btnAdmin" type="button">Admin</button>
+        <button id="btnLogout" type="button">Logout</button>
+      </div>
     </div>
   </div>
 
-  <section class="card">
+  <div class="container">
+  <section class="card" id="analyticsSection">
     <h2 style="margin-top:0;">Manager Analytics</h2>
-    <p class="muted">Live summary from service stats.</p>
+    <p class="muted">Live summary from Vote Here (admin questions and voting).</p>
 
-    <div class="metric"><strong>Required Answered:</strong> <span id="requiredAnswered">0</span></div>
-    <div class="metric"><strong>Still Need to Answer:</strong> <span id="stillNeed">0</span></div>
-    <div class="metric"><strong>Total Activity:</strong> <span id="totalActivity">0</span></div>
-    <div class="metric"><strong>Completion:</strong> <span id="completion">0%</span></div>
-    <div class="metric"><strong>Top Concern:</strong> <span id="topConcern">—</span></div>
+    <h3 class="analytics-subhead">Participation</h3>
+    <div class="metric analytics-bar-wrap">
+      <div class="analytics-bar-wrap">
+        <div class="analytics-bar-label"><strong>Employees who voted</strong><span id="requiredAnswered">0 / 20</span></div>
+        <div class="analytics-bar-track"><div id="barRequiredAnswered" class="analytics-bar-fill" style="width:0%;"></div></div>
+      </div>
+      <div class="analytics-bar-wrap">
+        <div class="analytics-bar-label"><strong>Total questions</strong><span id="stillNeed">0</span></div>
+        <div class="analytics-bar-track"><div id="barStillNeed" class="analytics-bar-fill" style="width:0%;"></div></div>
+      </div>
+      <div class="analytics-bar-wrap">
+        <div class="analytics-bar-label"><strong>Total votes</strong><span id="totalActivity">0</span></div>
+        <div class="analytics-bar-track"><div id="barTotalActivity" class="analytics-bar-fill" style="width:0%;"></div></div>
+      </div>
+      <div class="analytics-bar-wrap">
+        <div class="analytics-bar-label"><strong>Completion</strong><span id="completion">0%</span></div>
+        <div class="analytics-bar-track"><div id="barCompletion" class="analytics-bar-fill" style="width:0%;"></div></div>
+      </div>
+    </div>
 
+    <h3 class="analytics-subhead">Top Concern</h3>
     <div class="metric">
-      <strong>Trending Topics</strong>
-      <ul id="topics"></ul>
+      <p class="analytics-bar-label" style="margin-bottom:6px;"><strong>Question with the most dislikes</strong></p>
+      <div id="topConcern" class="top-concern-question">—</div>
+      <div id="topConcernDislikes" class="muted" style="margin-top:6px; font-size:13px;"></div>
+    </div>
+
+    <h3 class="analytics-subhead">Trending Employee Topics</h3>
+    <div class="metric">
+      <div id="topics"></div>
     </div>
 
     <div id="statusMsg"></div>
   </section>
 
+  <section class="card" id="submitQuestionsSection" style="margin-top: 20px;">
+    <h2 style="margin-top:0;">Submit Questions</h2>
+    <p class="subheader">Submit questions that employees will vote on. Employees are required to vote on these.</p>
+    <textarea id="voteQuestionText" rows="3" placeholder="e.g. Should we offer remote work every Friday?" style="width:100%; margin-bottom:10px; padding:10px; border-radius:12px; border:1px solid var(--border);"></textarea>
+    <div class="btnRow">
+      <button id="btnSubmitVoteQuestion" type="button" class="btnAddQuestion">Add question</button>
+    </div>
+    <div id="voteQuestionMsg" class="msg" style="margin-top:8px;"></div>
+  </section>
+
+  <div class="admin-two-col">
+    <section class="card" id="ideasSection">
+      <h2 style="margin-top:0;">Employee Suggestions</h2>
+      <p class="subheader">Overview of employee suggestions and results.</p>
+      <div class="ideas-sort-wrap">
+        <label for="ideasSortFilter">Sort:</label>
+        <select id="ideasSortFilter" class="ideas-sort-select">
+          <option value="most_least_liked">Most → Least liked</option>
+          <option value="least_most_liked">Least → Most liked</option>
+          <option value="newest_first">Newest → Oldest</option>
+          <option value="oldest_first">Oldest → Newest</option>
+        </select>
+      </div>
+      <div id="ideasList"></div>
+    </section>
+
+    <section class="card" id="promptsSection">
+      <div class="prompts-header">
+        <h2 style="margin:0;">Prompts</h2>
+        <span class="pill">Retire when done</span>
+      </div>
+      <div id="promptsList"></div>
+    </section>
+  </div>
+
+  <section class="card" id="suggestionsSection" style="margin-top: 20px;">
+    <h2 style="margin-top:0;">Employee Feedback</h2>
+    <p class="subheader">Review employee feedback.</p>
+    <div id="suggestionsCards"></div>
+  </section>
+  </div>
+
   <script>
+    var cachedIdeas = [];
+
     function apiUrl(method) {
       return "/ProjectServices.asmx/" + method;
+    }
+
+    function escapeHtml(text) {
+      return String(text)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
     }
 
     function redirectToLogin() {
@@ -137,26 +481,40 @@
     }
 
     function renderStats(data) {
-      $("#requiredAnswered").text(Number(data.requiredAnswered) || 0);
-      $("#stillNeed").text(Number(data.stillNeedToAnswer) || 0);
-      $("#totalActivity").text(Number(data.totalActivity) || 0);
-      $("#completion").text((Number(data.completionPercent) || 0) + "%");
+      var required = Number(data.requiredAnswered) || 0;
+      var stillNeed = Number(data.stillNeedToAnswer) || 0;
+      var totalAct = Number(data.totalActivity) || 0;
+      var completion = Number(data.completionPercent) || 0;
 
-      const topLabel = data.topConcern && data.topConcern.label ? data.topConcern.label : "—";
-      const topCount = data.topConcern && typeof data.topConcern.count !== "undefined" ? data.topConcern.count : 0;
-      $("#topConcern").text(topLabel + " (" + topCount + ")");
+      $("#requiredAnswered").text(required + " / 20");
+      $("#stillNeed").text(stillNeed);
+      $("#totalActivity").text(totalAct);
+      $("#completion").text(completion + "%");
 
-      const topics = data.topics || [];
+      var participationMax = 20;
+      var maxStill = Math.max(stillNeed, 50);
+      var maxActivity = Math.max(totalAct, 100);
+      $("#barRequiredAnswered").css("width", Math.min(100, (required / participationMax) * 100) + "%");
+      $("#barStillNeed").css("width", Math.min(100, (stillNeed / maxStill) * 100) + "%");
+      $("#barTotalActivity").css("width", Math.min(100, (totalAct / maxActivity) * 100) + "%");
+      $("#barCompletion").css("width", Math.min(100, completion) + "%");
+
+      var topLabel = data.topConcern && data.topConcern.label ? data.topConcern.label : "—";
+      var topCount = data.topConcern && typeof data.topConcern.count !== "undefined" ? data.topConcern.count : 0;
+      $("#topConcern").text(topLabel);
+      $("#topConcernDislikes").text(topCount > 0 ? topCount + " dislike" + (topCount !== 1 ? "s" : "") : "");
+
+      var topics = data.topics || [];
       if (!topics.length) {
-        $("#topics").html("<li>No topics yet.</li>");
+        $("#topics").html("<p class='muted'>No topics yet.</p>");
         return;
       }
-
-      let html = "";
+      var html = "";
       topics.forEach(function (t) {
-        const name = t.name || "—";
-        const pct = Number(t.pct) || 0;
-        html += "<li>" + name + " - " + pct + "%</li>";
+        var name = t.name || "—";
+        var pct = Math.min(100, Math.max(0, Number(t.pct) || 0));
+        html += "<div class='analytics-topic-bar'><div class='analytics-bar-label'>" + escapeHtml(name) + "<span>" + pct + "%</span></div>";
+        html += "<div class='analytics-bar-track'><div class='analytics-bar-fill' style='width:" + pct + "%;'></div></div></div>";
       });
       $("#topics").html(html);
     }
@@ -178,6 +536,306 @@
         },
         error: function () {
           $("#statusMsg").text("Could not load stats.");
+        }
+      });
+    }
+
+    function submitVoteQuestion() {
+      var text = ($("#voteQuestionText").val() || "").trim();
+      if (!text) {
+        $("#voteQuestionMsg").css("color", "#b00020").text("Please enter the question text.");
+        return;
+      }
+      $("#voteQuestionMsg").text("");
+      $("#btnSubmitVoteQuestion").prop("disabled", true);
+      $.ajax({
+        type: "POST",
+        url: apiUrl("AddVoteQuestion"),
+        contentType: "application/json; charset=utf-8",
+        data: JSON.stringify({ questionText: text }),
+        dataType: "json",
+        success: function (res) {
+          var data = res && res.d !== undefined ? res.d : res;
+          if (!data || !data.success) {
+            $("#voteQuestionMsg").css("color", "#b00020").text(data && data.message ? data.message : "Failed to add question.");
+            $("#btnSubmitVoteQuestion").prop("disabled", false);
+            return;
+          }
+          $("#voteQuestionMsg").css("color", "#166534").text(data.message || "Question added.");
+          $("#voteQuestionText").val("");
+          loadVoteQuestions();
+          $("#btnSubmitVoteQuestion").prop("disabled", false);
+        },
+        error: function () {
+          $("#voteQuestionMsg").css("color", "#b00020").text("Request failed.");
+          $("#btnSubmitVoteQuestion").prop("disabled", false);
+        }
+      });
+    }
+
+    function loadVoteQuestions() {
+      $.ajax({
+        type: "POST",
+        url: apiUrl("GetVoteQuestions"),
+        contentType: "application/json; charset=utf-8",
+        data: "{}",
+        dataType: "json",
+        success: function (res) {
+          if (!res || typeof res.d === "undefined") {
+            $("#promptsList").html("<p class='muted'>Unable to load questions.</p>");
+            return;
+          }
+          var rows = res.d || [];
+          if (!rows.length) {
+            $("#promptsList").html("<p class='muted'>No Vote Here questions yet. Add one above.</p>");
+            return;
+          }
+          var now = new Date();
+          var withStatus = rows.map(function (q) {
+            var createdStr = q.CreatedDate || q.createdDate || "";
+            var created = new Date(createdStr);
+            var daysSince = isNaN(created.getTime()) ? 0 : Math.floor((now - created) / (24 * 60 * 60 * 1000));
+            var daysLeft = Math.max(0, 7 - daysSince);
+            var manuallyRetired = !!(q.Retired !== undefined ? q.Retired : q.retired);
+            var isRetired = manuallyRetired || daysLeft <= 0;
+            return { q: q, isRetired: isRetired, daysLeft: daysLeft };
+          });
+          withStatus.sort(function (a, b) {
+            if (a.isRetired !== b.isRetired) return a.isRetired ? 1 : -1;
+            return 0;
+          });
+          var html = "";
+          withStatus.forEach(function (item) {
+            var q = item.q;
+            var isRetired = item.isRetired;
+            var daysLeft = item.daysLeft;
+            var yesCount = Number(q.RightVotes) || 0;
+            var noCount = Number(q.LeftVotes) || 0;
+            var responses = yesCount + noCount;
+            var pillClass = isRetired ? "pill pill-retired" : "pill pill-active";
+            var pillText = isRetired ? "Retire" : "Active";
+            var autoRetireText = isRetired ? "Retire" : "Auto-retire at: " + daysLeft + " day" + (daysLeft !== 1 ? "s" : "");
+            var btnClass = isRetired ? "btnActivate" : "btnRetire";
+            var btnText = isRetired ? "Activate" : "Retire";
+            html += "<div class='metric' style='margin-bottom:8px; display:flex; justify-content:space-between; align-items:flex-start; gap:10px;'>";
+            html += "<div><div style='margin-bottom:4px;'>" + escapeHtml(q.QuestionText || "") + " <span class='" + pillClass + "'>" + pillText + "</span></div><div class='muted' style='margin-top:4px;'>Responses: " + responses + " - " + autoRetireText + "</div></div>";
+            html += "<button type='button' class='" + btnClass + "' data-question-id='" + (q.QuestionID || "") + "' data-retired='" + (isRetired ? "1" : "0") + "'>" + btnText + "</button></div>";
+          });
+          $("#promptsList").html(html);
+          $("#promptsList .btnRetire").on("click", function () {
+            var id = $(this).data("question-id");
+            if (!id) return;
+            retireVoteQuestion(id);
+          });
+          $("#promptsList .btnActivate").on("click", function () {
+            var id = $(this).data("question-id");
+            if (!id) return;
+            activateVoteQuestion(id);
+          });
+        },
+        error: function () {
+          $("#promptsList").html("<p class='muted'>Unable to load questions.</p>");
+        }
+      });
+    }
+
+    function retireVoteQuestion(questionId) {
+      var id = parseInt(questionId, 10);
+      if (isNaN(id)) { alert("Invalid question ID."); return; }
+      $.ajax({
+        type: "POST",
+        url: apiUrl("RetireVoteQuestion"),
+        contentType: "application/json; charset=utf-8",
+        data: JSON.stringify({ questionId: id }),
+        dataType: "json",
+        success: function (res) {
+          var data = res && res.d !== undefined ? res.d : res;
+          if (data && data.success) {
+            loadVoteQuestions();
+            loadStats();
+          } else {
+            alert(data && data.message ? data.message : "Retire failed.");
+          }
+        },
+        error: function (xhr) {
+          var msg = "Retire failed.";
+          if (xhr && xhr.responseText) {
+            try {
+              var j = JSON.parse(xhr.responseText);
+              var d = j.d || j;
+              if (d && d.message) msg = d.message;
+            } catch (e) {
+              if (xhr.responseText.length < 200) msg = "Retire failed: " + xhr.responseText;
+            }
+          }
+          alert(msg);
+        }
+      });
+    }
+
+    function activateVoteQuestion(questionId) {
+      var id = parseInt(questionId, 10);
+      if (isNaN(id)) { alert("Invalid question ID."); return; }
+      $.ajax({
+        type: "POST",
+        url: apiUrl("ActivateVoteQuestion"),
+        contentType: "application/json; charset=utf-8",
+        data: JSON.stringify({ questionId: id }),
+        dataType: "json",
+        success: function (res) {
+          var data = res && res.d !== undefined ? res.d : res;
+          if (data && data.success) {
+            loadVoteQuestions();
+            loadStats();
+          } else {
+            alert(data && data.message ? data.message : "Activate failed.");
+          }
+        },
+        error: function (xhr) {
+          var msg = "Activate failed.";
+          if (xhr && xhr.responseText) {
+            try {
+              var j = JSON.parse(xhr.responseText);
+              var d = j.d || j;
+              if (d && d.message) msg = d.message;
+            } catch (e) {
+              if (xhr.responseText.length < 200) msg = "Activate failed: " + xhr.responseText;
+            }
+          }
+          alert(msg);
+        }
+      });
+    }
+
+    function sortIdeas(rows, sortKey) {
+      var arr = rows.slice();
+      var key = sortKey || "most_least_liked";
+      arr.sort(function (a, b) {
+        var upA = Number(a.UpVotes !== undefined ? a.UpVotes : a.upVotes) || 0;
+        var downA = Number(a.DownVotes !== undefined ? a.DownVotes : a.downVotes) || 0;
+        var upB = Number(b.UpVotes !== undefined ? b.UpVotes : b.upVotes) || 0;
+        var downB = Number(b.DownVotes !== undefined ? b.DownVotes : b.downVotes) || 0;
+        var totalA = upA + downA, totalB = upB + downB;
+        var supportA = totalA > 0 ? upA / totalA : 0, supportB = totalB > 0 ? upB / totalB : 0;
+        var dateA = (a.CreatedDate || a.createdDate || "").toString();
+        var dateB = (b.CreatedDate || b.createdDate || "").toString();
+        if (key === "most_least_liked") {
+          if (supportB !== supportA) return supportB - supportA;
+          return (totalB - totalA) || ((b.IdeaID || b.ideaID || 0) - (a.IdeaID || a.ideaID || 0));
+        }
+        if (key === "least_most_liked") {
+          if (supportA !== supportB) return supportA - supportB;
+          return (totalA - totalB) || ((a.IdeaID || a.ideaID || 0) - (b.IdeaID || b.ideaID || 0));
+        }
+        if (key === "newest_first") return dateB.localeCompare(dateA);
+        if (key === "oldest_first") return dateA.localeCompare(dateB);
+        return 0;
+      });
+      return arr;
+    }
+
+    function renderIdeas(rows, sortKey) {
+      if (!rows || !rows.length) {
+        $("#ideasList").html("<p class='muted'>No submitted ideas in the last 7 days.</p>");
+        return;
+      }
+      var sorted = sortIdeas(rows, sortKey);
+      var html = "";
+      sorted.forEach(function (idea) {
+        var up = Number(idea.UpVotes !== undefined ? idea.UpVotes : idea.upVotes) || 0;
+        var down = Number(idea.DownVotes !== undefined ? idea.DownVotes : idea.downVotes) || 0;
+        var total = up + down;
+        var supportPct = total > 0 ? Math.round((up / total) * 1000) / 10 : 0;
+        html += "<div class='metric' style='margin-bottom:8px; display:flex; justify-content:space-between; align-items:flex-start; gap:10px;'>";
+        html += "<div><div>" + escapeHtml(idea.IdeaText || idea.ideaText || "") + "</div><div class='muted' style='margin-top:4px;'>Support: " + supportPct + "% - 👍 " + up + " - 👎 " + down + "</div></div>";
+        html += "<button type='button' class='btnDelete' data-idea-id='" + (idea.IdeaID || idea.ideaID || "") + "'>Remove</button></div>";
+      });
+      $("#ideasList").html(html);
+      $("#ideasList .btnDelete").on("click", function () {
+        var id = $(this).data("idea-id");
+        if (!id) return;
+        if (!confirm("Delete this idea? Votes will be removed.")) return;
+        deleteIdea(id);
+      });
+    }
+
+    function loadIdeas() {
+      $.ajax({
+        type: "POST",
+        url: apiUrl("GetIdeas"),
+        contentType: "application/json; charset=utf-8",
+        data: "{}",
+        dataType: "json",
+        success: function (res) {
+          if (!res || typeof res.d === "undefined") {
+            $("#ideasList").html("<p class='muted'>Unable to load ideas.</p>");
+            return;
+          }
+          var rows = res.d || [];
+          cachedIdeas = rows;
+          var sortKey = $("#ideasSortFilter").val() || "most_least_liked";
+          if (!rows.length) {
+            $("#ideasList").html("<p class='muted'>No submitted ideas in the last 7 days.</p>");
+            return;
+          }
+          renderIdeas(rows, sortKey);
+        },
+        error: function () {
+          $("#ideasList").html("<p class='muted'>Unable to load ideas.</p>");
+        }
+      });
+    }
+
+    function deleteIdea(ideaId) {
+      $.ajax({
+        type: "POST",
+        url: apiUrl("DeleteIdea"),
+        contentType: "application/json; charset=utf-8",
+        data: JSON.stringify({ ideaId: ideaId }),
+        dataType: "json",
+        success: function (res) {
+          var data = res && res.d !== undefined ? res.d : res;
+          if (data && data.success) {
+            loadIdeas();
+          } else {
+            alert(data && data.message ? data.message : "Delete failed.");
+          }
+        },
+        error: function () { alert("Delete failed."); }
+      });
+    }
+
+    function loadSuggestions() {
+      $.ajax({
+        type: "POST",
+        url: apiUrl("GetSuggestions"),
+        contentType: "application/json; charset=utf-8",
+        data: "{}",
+        dataType: "json",
+        success: function (res) {
+          if (!res || typeof res.d === "undefined") {
+            $("#suggestionsCards").html("<p>Unable to load suggestions.</p>");
+            return;
+          }
+
+          const rows = res.d || [];
+          if (!rows.length) {
+            $("#suggestionsCards").html("<p>No suggestions yet.</p>");
+            return;
+          }
+
+          let html = "";
+          rows.forEach(function (s) {
+            html += "<div class='item'>"
+              + "<div class='small'>" + escapeHtml(s.CreatedDate || "") + "</div>"
+              + "<div style='margin-top:6px;'>" + escapeHtml(s.SuggestionText || "") + "</div>"
+              + "</div>";
+          });
+
+          $("#suggestionsCards").html(html);
+        },
+        error: function () {
+          $("#suggestionsCards").html("<p>Error loading suggestions.</p>");
         }
       });
     }
@@ -206,11 +864,19 @@
             return;
           }
           if (!access.verified) {
+            document.body.style.visibility = "visible";
             renderAccessDenied();
             return;
           }
 
+          document.body.style.visibility = "visible";
           loadStats();
+          loadVoteQuestions();
+          loadIdeas();
+          loadSuggestions();
+          $("#ideasSortFilter").off("change").on("change", function () {
+            if (cachedIdeas.length) renderIdeas(cachedIdeas, $(this).val());
+          });
         },
         error: function () {
           redirectToLogin();
@@ -236,11 +902,11 @@
     }
 
     $(document).ready(function () {
-      $("#btnBack").on("click", function () {
-        window.location.href = "dashboard.html";
+      $("#btnAdmin").on("click", function () {
+        window.location.href = "admin-pin.html";
       });
-
       $("#btnLogout").on("click", logout);
+      $("#btnSubmitVoteQuestion").on("click", submitVoteQuestion);
       checkAccessAndInit();
     });
   </script>

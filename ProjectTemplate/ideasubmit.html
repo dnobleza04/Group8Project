@@ -3,12 +3,344 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Submit Idea</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <style>
+:root{
+  --bg1:#0f172a;
+  --bg2:#1e293b;
+  --border-topbar: rgba(255, 255, 255, 0.22);
+  --text:#f1f5f9;
+  --muted:#94a3b8;
+  --card-text:#0f172a;
+  --card-bg: rgba(248, 250, 252, 0.97);
+  --primary:#4f46e5;
+  --red:#ef4444;
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.06);
+  --border: rgba(0, 0, 0, 0.08);
+}
+*{ box-sizing: border-box; }
+body{
+  margin:0;
+  min-height:100vh;
+  color:var(--text);
+  font-family: "Segoe UI", Roboto, Arial, sans-serif;
+  background:
+    radial-gradient(1100px 600px at 15% 15%, var(--bg2), transparent 60%),
+    radial-gradient(900px 500px at 85% 25%, #1e3a5f, transparent 55%),
+    linear-gradient(180deg, var(--bg1), #0f172a);
+}
+.topbar{
+  position: sticky;
+  top:0;
+  z-index: 50;
+  background: rgba(15, 23, 42, 0.94);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border-topbar);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+}
+.topbarInner{
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+.brand{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 900;
+  letter-spacing: .2px;
+  flex-shrink: 0;
+}
+.logoDot{
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--primary), #60a5fa);
+  box-shadow: 0 10px 18px rgba(79,70,229,0.20);
+}
+.navLinks{
+  display: flex;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+  justify-content: center;
+  flex-wrap: nowrap;
+  font-size: 14px;
+}
+.navLinks a{
+  color: var(--muted);
+  text-decoration: none;
+  padding: 8px 14px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  font-weight: 800;
+  transition: 0.2s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.navLinks a:hover{
+  color: var(--text);
+  background: rgba(79,70,229,0.08);
+}
+.navLinks a.active{
+  color: var(--primary);
+  background: rgba(79,70,229,0.10);
+  box-shadow: inset 0 0 0 1px rgba(79,70,229,0.25);
+}
+.top-actions, .topbar-actions{
+  flex-shrink: 0;
+  min-width: 280px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: nowrap;
+}
+.topbar-actions a.topbar-btn{
+  display: inline-block;
+  padding: 10px 16px;
+  border-radius: 12px;
+  font-weight: 900;
+  font-size: 14px;
+  text-decoration: none;
+  color: #0f172a;
+  background: rgba(255,255,255,0.95);
+  border: 1px solid rgba(255,255,255,0.4);
+  transition: 0.2s ease;
+  white-space: nowrap;
+}
+.topbar-actions a.topbar-btn:hover{
+  background: #fff;
+  color: #0f172a;
+}
+.topbar-actions a.topbar-btn.btn-logout{
+  background: var(--red);
+  color: #fff;
+  border-color: transparent;
+}
+.topbar-actions a.topbar-btn.btn-logout:hover{
+  filter: brightness(1.1);
+}
+.container{
+  max-width: 900px;
+  margin: 26px auto;
+  padding: 0 16px;
+}
+h1{
+  margin: 0 0 10px 0;
+  font-size: 38px;
+  font-weight: 900;
+  letter-spacing: -0.5px;
+}
+.subtext{
+  margin: 0 0 18px 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.55;
+}
+.card{
+  background: var(--card-bg);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 18px;
+  padding: 16px;
+  box-shadow: var(--shadow-card);
+  margin-bottom: 14px;
+  color: var(--card-text);
+}
+.card .subtext{ color: #64748b; }
+.cardHeader{
+  display:flex;
+  align-items:flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.cardTitle{ font-size: 18px; font-weight:900; margin:0; }
+.pill{
+  font-size:12px;
+  color: var(--muted);
+  border:1px solid var(--border);
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.85);
+  white-space: nowrap;
+}
+.btnRow{
+  display:flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+}
+button{
+  border:none;
+  border-radius: 12px;
+  padding: 11px 14px;
+  font-weight: 900;
+  cursor:pointer;
+  white-space: nowrap;
+  transition: 0.2s ease;
+}
+button:hover{
+  transform: translateY(-1px);
+  box-shadow: 0 12px 20px rgba(15,23,42,0.14);
+}
+button:active{ transform: translateY(0); }
+textarea{
+  width:100%;
+  min-height:90px;
+  border-radius:12px;
+  border:1.5px solid var(--border);
+  background: rgba(255,255,255,0.95);
+  color: var(--text);
+  padding:10px 12px;
+  resize: vertical;
+  transition: 0.2s ease;
+}
+textarea:focus{
+  outline:none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(79,70,229,0.15);
+}
+.small{ font-size: 12px; color: var(--muted); font-weight: 700; }
+.msg{ margin-top: 10px; min-height: 22px; font-size: 14px; font-weight: 700; }
+#btnSubmitIdea{ background: var(--primary); color: #fff; }
+#ideaText{ color: #0f172a; }
+    </style>
 </head>
-<style> 
-    
-</style>
 <body>
-    
+  <div class="topbar">
+    <div class="topbarInner">
+      <div class="brand">
+        <div class="logoDot"></div>
+        <div>Employee Feedback</div>
+      </div>
+      <div class="navLinks">
+        <a href="dashboard.html">Dashboard</a>
+        <a href="employee.html">Employee</a>
+        <a class="active" href="ideasubmit.html">Submit Idea</a>
+      </div>
+      <div class="top-actions topbar-actions">
+        <a href="admin-pin.html" class="topbar-btn">Admin</a>
+        <a href="login.html" class="topbar-btn btn-logout">Logout</a>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <h1>Submit Idea</h1>
+    <p class="subtext">Optional for all employees. Submit ideas that could help improve the workplace—from process changes to amenities to culture. Your peers can vote on suggestions so the team can see what matters most.</p>
+
+    <section class="card" style="margin-top: 24px;">
+      <h2 style="margin: 0 0 8px 0; font-size: 20px; font-weight: 900;">Share your idea</h2>
+      <p class="subtext" style="margin: 0 0 14px 0;">Describe your suggestion below. It will appear on the dashboard where others can vote on it.</p>
+      <textarea id="ideaText" rows="5" placeholder="e.g. Add standing desks in the east wing, weekly team coffee runs, or a simpler approval process for small expenses..."></textarea>
+      <div class="btnRow">
+        <button id="btnSubmitIdea" type="button">Submit idea</button>
+      </div>
+      <div id="ideaMsg" class="msg"></div>
+    </section>
+  </div>
+
+  <script>
+    function apiUrl(method) {
+      return "/ProjectServices.asmx/" + method;
+    }
+
+    function checkAccessThenInit() {
+      $.ajax({
+        type: "POST",
+        url: apiUrl("GetAccessStatus"),
+        contentType: "application/json; charset=utf-8",
+        data: "{}",
+        dataType: "json",
+        success: function (res) {
+          if (!res || !res.d) {
+            window.location.href = "login.html";
+            return;
+          }
+          var access = res.d;
+          if (!access.loggedIn) {
+            window.location.href = "login.html";
+            return;
+          }
+          if (!access.verified) {
+            document.body.innerHTML = "<h1 style='font-family:Segoe UI,Roboto,Arial,sans-serif;text-align:center;margin-top:40px;'>Access Denied</h1>";
+            return;
+          }
+          $.ajax({
+            type: "POST",
+            url: apiUrl("HasCompletedVoteRequirement"),
+            contentType: "application/json; charset=utf-8",
+            data: "{}",
+            dataType: "json",
+            success: function (voteRes) {
+              var voteData = voteRes && voteRes.d ? voteRes.d : null;
+              if (voteData && !voteData.completed) {
+                window.location.href = "dashboard.html?mustVote=1";
+                return;
+              }
+              initPage();
+            },
+            error: function () { initPage(); }
+          });
+        },
+        error: function () {
+          window.location.href = "login.html";
+        }
+      });
+    }
+    function initPage() {
+      $("#btnSubmitIdea").on("click", submitIdea);
+    }
+
+    function submitIdea() {
+      var text = ($("#ideaText").val() || "").trim();
+      if (!text) {
+        $("#ideaMsg").css("color", "#b00020").text("Please enter your idea.");
+        return;
+      }
+
+      $("#ideaMsg").css("color", "").text("");
+      $("#btnSubmitIdea").prop("disabled", true);
+
+      $.ajax({
+        type: "POST",
+        url: apiUrl("AddIdea"),
+        contentType: "application/json; charset=utf-8",
+        data: JSON.stringify({ ideaText: text }),
+        dataType: "json",
+        success: function (res) {
+          var data = res && res.d ? res.d : null;
+          if (!data || !data.success) {
+            var message = (data && data.message) ? data.message : "Submit failed.";
+            if ((message || "").toLowerCase().indexOf("login") >= 0 || (message || "").toLowerCase().indexOf("logged") >= 0) {
+              window.location.href = "login.html";
+              return;
+            }
+            $("#ideaMsg").css("color", "#b00020").text(message);
+            $("#btnSubmitIdea").prop("disabled", false);
+            return;
+          }
+          $("#ideaMsg").css("color", "#166534").text("Idea submitted. Peers can vote on it from the dashboard.");
+          $("#ideaText").val("");
+          $("#btnSubmitIdea").prop("disabled", false);
+        },
+        error: function () {
+          $("#ideaMsg").css("color", "#b00020").text("Submit failed. Try again or log in.");
+          $("#btnSubmitIdea").prop("disabled", false);
+        }
+      });
+    }
+
+    $(document).ready(function () {
+      checkAccessThenInit();
+    });
+  </script>
 </body>
 </html>
