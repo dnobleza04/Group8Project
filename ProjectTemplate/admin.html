@@ -904,8 +904,6 @@ li{ margin: 6px 0; }
       });
     }
 
-    var suggestionStatusOpts = ["Pending", "Under Review", "Implementing", "Implemented", "Declined"];
-
     function loadSuggestions() {
       $.ajax({
         type: "POST",
@@ -925,11 +923,13 @@ li{ margin: 6px 0; }
             return;
           }
 
+          var statusOpts = ["Not Started", "Under Review", "Reviewed"];
           var html = "";
           rows.forEach(function (s) {
-            var rawStatus = (s.Status || "Pending").toString();
-            var currentStatus = rawStatus.toUpperCase() === "PENDING" ? "Pending" : rawStatus;
-            var optHtml = suggestionStatusOpts.map(function (o) {
+            var rawStatus = (s.Status || s.status || "").toString().trim();
+            var currentStatus = "Not Started";
+            if (statusOpts.indexOf(rawStatus) !== -1) currentStatus = rawStatus;
+            var optHtml = statusOpts.map(function (o) {
               return "<option value=\"" + escapeHtml(o) + "\"" + (o === currentStatus ? " selected" : "") + ">" + escapeHtml(o) + "</option>";
             }).join("");
             html += "<div class='item'>";
@@ -937,7 +937,7 @@ li{ margin: 6px 0; }
             html += "<div style='margin-top:6px;'>" + escapeHtml(s.SuggestionText || "") + "</div>";
             html += "<div class='suggestion-item-actions'>";
             html += "<div class='suggestion-item-actions-top'><button type='button' class='btnDelete btnDeleteSuggestion' data-suggestion-id='" + (s.SuggestionID || "") + "'>Remove</button></div>";
-            html += "<div class='suggestion-item-actions-bottom'><label>Considered:</label>";
+            html += "<div class='suggestion-item-actions-bottom'><label>Status:</label>";
             html += "<select class='suggestion-status-select pill' data-suggestion-id='" + (s.SuggestionID || "") + "'>" + optHtml + "</select>";
             html += "</div></div></div>";
           });

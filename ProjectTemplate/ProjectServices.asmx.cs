@@ -13,6 +13,7 @@ namespace ProjectTemplate
 	[ScriptService]
 	public class ProjectServices : WebService
 	{
+		private static bool _suggestionsStatusMigrated = false;
 		private string dbID = "cis440Spring2026team8";
 		private string dbPass = "cis440Spring2026team8";
 		private string dbName = "cis440Spring2026team8";
@@ -307,17 +308,30 @@ namespace ProjectTemplate
 
 				EnsureAnonId();
 
-				string sql = @"
-					INSERT INTO Suggestions (SuggestionText, CreatedDate, UpVotes, DownVotes)
-					VALUES (@text, NOW(), 0, 0);
-				";
-
 				using (MySqlConnection con = new MySqlConnection(getConString()))
-				using (MySqlCommand cmd = new MySqlCommand(sql, con))
 				{
-					cmd.Parameters.AddWithValue("@text", suggestionText);
 					con.Open();
-					cmd.ExecuteNonQuery();
+					try
+					{
+						using (MySqlCommand cmd = new MySqlCommand(@"
+							INSERT INTO Suggestions (SuggestionText, CreatedDate, UpVotes, DownVotes, Status)
+							VALUES (@text, NOW(), 0, 0, 'Not Started')", con))
+						{
+							cmd.Parameters.AddWithValue("@text", suggestionText);
+							cmd.ExecuteNonQuery();
+						}
+					}
+					catch
+					{
+						// Status column may not exist
+						using (MySqlCommand cmd = new MySqlCommand(@"
+							INSERT INTO Suggestions (SuggestionText, CreatedDate, UpVotes, DownVotes)
+							VALUES (@text, NOW(), 0, 0)", con))
+						{
+							cmd.Parameters.AddWithValue("@text", suggestionText);
+							cmd.ExecuteNonQuery();
+						}
+					}
 				}
 
 				result.success = true;
@@ -352,8 +366,26 @@ namespace ProjectTemplate
 
 			try
 			{
+				// One-time migration: set legacy Under Review / null / empty to Not Started
+				if (!_suggestionsStatusMigrated)
+				{
+					try
+					{
+						using (MySqlConnection con = new MySqlConnection(getConString()))
+						using (MySqlCommand cmd = new MySqlCommand(@"
+							UPDATE Suggestions SET Status = 'Not Started'
+							WHERE Status IS NULL OR TRIM(COALESCE(Status, '')) = '' OR Status = 'Under Review'", con))
+						{
+							con.Open();
+							cmd.ExecuteNonQuery();
+						}
+					}
+					catch { /* column may not exist yet */ }
+					_suggestionsStatusMigrated = true;
+				}
+
 				string sqlWithStatus = @"
-					SELECT SuggestionID, SuggestionText, CreatedDate, UpVotes, DownVotes, COALESCE(Status, 'Pending') AS Status
+					SELECT SuggestionID, SuggestionText, CreatedDate, UpVotes, DownVotes, COALESCE(Status, 'Not Started') AS Status
 					FROM Suggestions
 					ORDER BY CreatedDate DESC
 					LIMIT 50;
@@ -383,7 +415,7 @@ namespace ProjectTemplate
 									CreatedDate = Convert.ToDateTime(rdr["CreatedDate"]).ToString("yyyy-MM-dd HH:mm"),
 									UpVotes = Convert.ToInt32(rdr["UpVotes"]),
 									DownVotes = Convert.ToInt32(rdr["DownVotes"]),
-									Status = rdr["Status"] != null && rdr["Status"] != DBNull.Value ? rdr["Status"].ToString() : "Pending"
+									Status = rdr["Status"] != null && rdr["Status"] != DBNull.Value ? rdr["Status"].ToString() : "Not Started"
 								});
 							}
 						}
@@ -406,7 +438,7 @@ namespace ProjectTemplate
 									CreatedDate = Convert.ToDateTime(rdr["CreatedDate"]).ToString("yyyy-MM-dd HH:mm"),
 									UpVotes = Convert.ToInt32(rdr["UpVotes"]),
 									DownVotes = Convert.ToInt32(rdr["DownVotes"]),
-									Status = "Pending"
+									Status = "Not Started"
 								});
 							}
 						}
@@ -438,7 +470,7 @@ namespace ProjectTemplate
 				return result;
 			}
 			string s = (status ?? "").Trim();
-			if (s.Length == 0) s = "Pending";
+			if (s.Length == 0) s = "Not Started";
 			try
 			{
 				using (MySqlConnection con = new MySqlConnection(getConString()))
