@@ -3,6 +3,9 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
   <title>Admin Dashboard</title>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
   <style>
@@ -271,6 +274,48 @@ button:active{
   margin-bottom: 10px;
   background: rgba(255,255,255,0.85);
 }
+.idea-row{ display: flex; flex-direction: column; gap: 10px; }
+.idea-row-text{ flex: 1; min-width: 0; }
+.idea-row-actions{
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(0,0,0,0.06);
+}
+.idea-row-actions-top{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+.idea-row-actions-bottom{
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.idea-row-actions label{
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--card-text);
+  white-space: nowrap;
+}
+.idea-status-select{
+  min-width: 150px;
+  font-size: 13px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: #fff;
+  color: var(--card-text);
+  cursor: pointer;
+}
+.idea-status-select.pill{
+  padding: 6px 12px;
+  font-size: 12px;
+}
 .analytics-bar-wrap{
   margin-bottom: 14px;
 }
@@ -344,6 +389,27 @@ li{ margin: 6px 0; }
   font-size: 14px;
 }
 #suggestionsCards .item:first-child{ margin-top: 0; }
+.suggestion-item-actions{
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(0,0,0,0.06);
+}
+.suggestion-item-actions-top{ display: flex; align-items: center; gap: 8px; }
+.suggestion-item-actions-bottom{ display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.suggestion-status-select{
+  min-width: 150px;
+  font-size: 12px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: #fff;
+  color: var(--card-text);
+  cursor: pointer;
+}
 .vote-actions{ margin-top: 8px; display: flex; gap: 8px; }
   </style>
 </head>
@@ -741,21 +807,54 @@ li{ margin: 6px 0; }
       }
       var sorted = sortIdeas(rows, sortKey);
       var html = "";
+      var statusOpts = ["Pending", "Under Review", "Implementing", "Implemented", "Declined"];
       sorted.forEach(function (idea) {
         var up = Number(idea.UpVotes !== undefined ? idea.UpVotes : idea.upVotes) || 0;
         var down = Number(idea.DownVotes !== undefined ? idea.DownVotes : idea.downVotes) || 0;
         var total = up + down;
         var supportPct = total > 0 ? Math.round((up / total) * 1000) / 10 : 0;
-        html += "<div class='metric' style='margin-bottom:8px; display:flex; justify-content:space-between; align-items:flex-start; gap:10px;'>";
-        html += "<div><div>" + escapeHtml(idea.IdeaText || idea.ideaText || "") + "</div><div class='muted' style='margin-top:4px;'>Support: " + supportPct + "% - 👍 " + up + " - 👎 " + down + "</div></div>";
-        html += "<button type='button' class='btnDelete' data-idea-id='" + (idea.IdeaID || idea.ideaID || "") + "'>Remove</button></div>";
+        var rawStatus = (idea.Status || idea.status || "Pending").toString();
+        var currentStatus = rawStatus.toUpperCase() === "PENDING" ? "Pending" : rawStatus;
+        var optHtml = statusOpts.map(function (o) {
+          return "<option value=\"" + escapeHtml(o) + "\"" + (o === currentStatus ? " selected" : "") + ">" + escapeHtml(o) + "</option>";
+        }).join("");
+        html += "<div class='metric idea-row'>";
+        html += "<div class='idea-row-text'><div>" + escapeHtml(idea.IdeaText || idea.ideaText || "") + "</div><div class='muted' style='margin-top:4px;'>Support: " + supportPct + "% - 👍 " + up + " - 👎 " + down + "</div></div>";
+        html += "<div class='idea-row-actions'>";
+        html += "<div class='idea-row-actions-top'><button type='button' class='btnDelete' data-idea-id='" + (idea.IdeaID || idea.ideaID || "") + "'>Remove</button></div>";
+        html += "<div class='idea-row-actions-bottom'><label for='ideaStatus-" + (idea.IdeaID || idea.ideaID || "") + "'>Considered:</label>";
+        html += "<select id='ideaStatus-" + (idea.IdeaID || idea.ideaID || "") + "' class='idea-status-select pill' data-idea-id='" + (idea.IdeaID || idea.ideaID || "") + "'>" + optHtml + "</select>";
+        html += "</div></div></div>";
       });
       $("#ideasList").html(html);
-      $("#ideasList .btnDelete").on("click", function () {
+      $("#ideasList .idea-status-select").off("change").on("change", function () {
+        var id = $(this).data("idea-id");
+        var status = $(this).val();
+        if (!id) return;
+        updateIdeaStatus(id, status);
+      });
+      $("#ideasList .btnDelete").off("click").on("click", function () {
         var id = $(this).data("idea-id");
         if (!id) return;
         if (!confirm("Delete this idea? Votes will be removed.")) return;
         deleteIdea(id);
+      });
+    }
+
+    function updateIdeaStatus(ideaId, status) {
+      $.ajax({
+        type: "POST",
+        url: apiUrl("UpdateIdeaStatus"),
+        contentType: "application/json; charset=utf-8",
+        data: JSON.stringify({ ideaId: parseInt(ideaId, 10), status: status }),
+        dataType: "json",
+        success: function (res) {
+          var data = res && res.d !== undefined ? res.d : res;
+          if (data && data.success) {
+            var row = cachedIdeas.filter(function (i) { return (i.IdeaID || i.ideaID) == ideaId; })[0];
+            if (row) row.Status = status;
+          }
+        }
       });
     }
 
@@ -805,6 +904,8 @@ li{ margin: 6px 0; }
       });
     }
 
+    var suggestionStatusOpts = ["Pending", "Under Review", "Implementing", "Implemented", "Declined"];
+
     function loadSuggestions() {
       $.ajax({
         type: "POST",
@@ -818,25 +919,82 @@ li{ margin: 6px 0; }
             return;
           }
 
-          const rows = res.d || [];
+          var rows = res.d || [];
           if (!rows.length) {
             $("#suggestionsCards").html("<p>No suggestions yet.</p>");
             return;
           }
 
-          let html = "";
+          var html = "";
           rows.forEach(function (s) {
-            html += "<div class='item'>"
-              + "<div class='small'>" + escapeHtml(s.CreatedDate || "") + "</div>"
-              + "<div style='margin-top:6px;'>" + escapeHtml(s.SuggestionText || "") + "</div>"
-              + "</div>";
+            var rawStatus = (s.Status || "Pending").toString();
+            var currentStatus = rawStatus.toUpperCase() === "PENDING" ? "Pending" : rawStatus;
+            var optHtml = suggestionStatusOpts.map(function (o) {
+              return "<option value=\"" + escapeHtml(o) + "\"" + (o === currentStatus ? " selected" : "") + ">" + escapeHtml(o) + "</option>";
+            }).join("");
+            html += "<div class='item'>";
+            html += "<div class='small'>" + escapeHtml(s.CreatedDate || "") + "</div>";
+            html += "<div style='margin-top:6px;'>" + escapeHtml(s.SuggestionText || "") + "</div>";
+            html += "<div class='suggestion-item-actions'>";
+            html += "<div class='suggestion-item-actions-top'><button type='button' class='btnDelete btnDeleteSuggestion' data-suggestion-id='" + (s.SuggestionID || "") + "'>Remove</button></div>";
+            html += "<div class='suggestion-item-actions-bottom'><label>Considered:</label>";
+            html += "<select class='suggestion-status-select pill' data-suggestion-id='" + (s.SuggestionID || "") + "'>" + optHtml + "</select>";
+            html += "</div></div></div>";
           });
 
           $("#suggestionsCards").html(html);
+          $("#suggestionsCards .suggestion-status-select").off("change").on("change", function () {
+            var id = $(this).data("suggestion-id");
+            var status = $(this).val();
+            if (!id) return;
+            updateSuggestionStatus(id, status);
+          });
+          $("#suggestionsCards .btnDeleteSuggestion").off("click").on("click", function () {
+            var id = $(this).data("suggestion-id");
+            if (!id) return;
+            if (!confirm("Remove this feedback?")) return;
+            deleteSuggestion(id);
+          });
         },
         error: function () {
           $("#suggestionsCards").html("<p>Error loading suggestions.</p>");
         }
+      });
+    }
+
+    function updateSuggestionStatus(suggestionId, status) {
+      $.ajax({
+        type: "POST",
+        url: apiUrl("UpdateSuggestionStatus"),
+        contentType: "application/json; charset=utf-8",
+        data: JSON.stringify({ suggestionId: parseInt(suggestionId, 10), status: status }),
+        dataType: "json",
+        success: function (res) {
+          var data = res && res.d !== undefined ? res.d : res;
+          if (data && data.success) {
+            var $sel = $("#suggestionsCards .suggestion-status-select[data-suggestion-id='" + suggestionId + "']");
+            if ($sel.length) $sel.val(status);
+          }
+        }
+      });
+    }
+
+    function deleteSuggestion(suggestionId) {
+      $.ajax({
+        type: "POST",
+        url: apiUrl("DeleteSuggestion"),
+        contentType: "application/json; charset=utf-8",
+        data: JSON.stringify({ suggestionId: parseInt(suggestionId, 10) }),
+        dataType: "json",
+        success: function (res) {
+          var data = res && res.d !== undefined ? res.d : res;
+          if (data && data.success) {
+            loadSuggestions();
+          } else {
+            alert(data && data.message ? data.message : "Delete failed.");
+          }
+        },
+        error: function () { alert("Delete failed."); }
       });
     }
 

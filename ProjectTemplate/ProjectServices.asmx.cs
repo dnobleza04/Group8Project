@@ -48,6 +48,7 @@ namespace ProjectTemplate
 			public string CreatedDate { get; set; }
 			public int UpVotes { get; set; }
 			public int DownVotes { get; set; }
+			public string Status { get; set; }
 		}
 
 		public class IdeaRow
@@ -57,6 +58,7 @@ namespace ProjectTemplate
 			public string CreatedDate { get; set; }
 			public int UpVotes { get; set; }
 			public int DownVotes { get; set; }
+			public string Status { get; set; }
 		}
 
 		public class VoteQuestionRow
@@ -350,7 +352,13 @@ namespace ProjectTemplate
 
 			try
 			{
-				string sql = @"
+				string sqlWithStatus = @"
+					SELECT SuggestionID, SuggestionText, CreatedDate, UpVotes, DownVotes, COALESCE(Status, 'Pending') AS Status
+					FROM Suggestions
+					ORDER BY CreatedDate DESC
+					LIMIT 50;
+				";
+				string sqlWithoutStatus = @"
 					SELECT SuggestionID, SuggestionText, CreatedDate, UpVotes, DownVotes
 					FROM Suggestions
 					ORDER BY CreatedDate DESC
@@ -358,21 +366,49 @@ namespace ProjectTemplate
 				";
 
 				using (MySqlConnection con = new MySqlConnection(getConString()))
-				using (MySqlCommand cmd = new MySqlCommand(sql, con))
 				{
 					con.Open();
-					using (MySqlDataReader rdr = cmd.ExecuteReader())
+					bool useStatus = true;
+					try
 					{
-						while (rdr.Read())
+						using (MySqlCommand cmd = new MySqlCommand(sqlWithStatus, con))
+						using (MySqlDataReader rdr = cmd.ExecuteReader())
 						{
-							rows.Add(new SuggestionRow
+							while (rdr.Read())
 							{
-								SuggestionID = Convert.ToInt32(rdr["SuggestionID"]),
-								SuggestionText = rdr["SuggestionText"].ToString(),
-								CreatedDate = Convert.ToDateTime(rdr["CreatedDate"]).ToString("yyyy-MM-dd HH:mm"),
-								UpVotes = Convert.ToInt32(rdr["UpVotes"]),
-								DownVotes = Convert.ToInt32(rdr["DownVotes"])
-							});
+								rows.Add(new SuggestionRow
+								{
+									SuggestionID = Convert.ToInt32(rdr["SuggestionID"]),
+									SuggestionText = rdr["SuggestionText"].ToString(),
+									CreatedDate = Convert.ToDateTime(rdr["CreatedDate"]).ToString("yyyy-MM-dd HH:mm"),
+									UpVotes = Convert.ToInt32(rdr["UpVotes"]),
+									DownVotes = Convert.ToInt32(rdr["DownVotes"]),
+									Status = rdr["Status"] != null && rdr["Status"] != DBNull.Value ? rdr["Status"].ToString() : "Pending"
+								});
+							}
+						}
+					}
+					catch
+					{
+						useStatus = false;
+					}
+					if (!useStatus && rows.Count == 0)
+					{
+						using (MySqlCommand cmd = new MySqlCommand(sqlWithoutStatus, con))
+						using (MySqlDataReader rdr = cmd.ExecuteReader())
+						{
+							while (rdr.Read())
+							{
+								rows.Add(new SuggestionRow
+								{
+									SuggestionID = Convert.ToInt32(rdr["SuggestionID"]),
+									SuggestionText = rdr["SuggestionText"].ToString(),
+									CreatedDate = Convert.ToDateTime(rdr["CreatedDate"]).ToString("yyyy-MM-dd HH:mm"),
+									UpVotes = Convert.ToInt32(rdr["UpVotes"]),
+									DownVotes = Convert.ToInt32(rdr["DownVotes"]),
+									Status = "Pending"
+								});
+							}
 						}
 					}
 				}
@@ -382,6 +418,90 @@ namespace ProjectTemplate
 			}
 
 			return rows;
+		}
+
+		[WebMethod(EnableSession = true)]
+		[ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+		public BasicResult UpdateSuggestionStatus(int suggestionId, string status)
+		{
+			BasicResult result = new BasicResult();
+			if (!IsVerifiedSession())
+			{
+				result.success = false;
+				result.message = "Access Denied";
+				return result;
+			}
+			if (suggestionId <= 0)
+			{
+				result.success = false;
+				result.message = "Invalid suggestion.";
+				return result;
+			}
+			string s = (status ?? "").Trim();
+			if (s.Length == 0) s = "Pending";
+			try
+			{
+				using (MySqlConnection con = new MySqlConnection(getConString()))
+				using (MySqlCommand cmd = new MySqlCommand("UPDATE Suggestions SET Status = @status WHERE SuggestionID = @id", con))
+				{
+					cmd.Parameters.AddWithValue("@status", s);
+					cmd.Parameters.AddWithValue("@id", suggestionId);
+					con.Open();
+					int updated = cmd.ExecuteNonQuery();
+					result.success = updated > 0;
+					result.message = updated > 0 ? "Status updated." : "Suggestion not found.";
+				}
+			}
+			catch (Exception ex)
+			{
+				result.success = false;
+				result.message = "Could not update: " + ex.Message;
+			}
+			return result;
+		}
+
+		[WebMethod(EnableSession = true)]
+		[ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+		public BasicResult DeleteSuggestion(int suggestionId)
+		{
+			BasicResult result = new BasicResult();
+			if (!IsVerifiedSession())
+			{
+				result.success = false;
+				result.message = "Access Denied";
+				return result;
+			}
+			if (suggestionId <= 0)
+			{
+				result.success = false;
+				result.message = "Invalid suggestion.";
+				return result;
+			}
+			try
+			{
+				using (MySqlConnection con = new MySqlConnection(getConString()))
+				{
+					con.Open();
+					using (MySqlCommand cmd = new MySqlCommand("DELETE FROM SuggestionVotes WHERE SuggestionID = @id", con))
+					{
+						cmd.Parameters.AddWithValue("@id", suggestionId);
+						cmd.ExecuteNonQuery();
+					}
+					using (MySqlCommand cmd = new MySqlCommand("DELETE FROM Suggestions WHERE SuggestionID = @id", con))
+					{
+						cmd.Parameters.AddWithValue("@id", suggestionId);
+						int deleted = cmd.ExecuteNonQuery();
+						result.success = deleted > 0;
+						result.message = deleted > 0 ? "Suggestion removed." : "Suggestion not found.";
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				result.success = false;
+				result.message = "Could not delete: " + ex.Message;
+			}
+			return result;
 		}
 
 		[WebMethod(EnableSession = true)]
@@ -455,7 +575,15 @@ namespace ProjectTemplate
 
 			try
 			{
-				string sql = @"
+				string sqlWithStatus = @"
+					SELECT IdeasID AS IdeaID, IdeasText AS IdeaText, CreatedDate, UpVotes, DownVotes,
+					       COALESCE(IdeaStatus, 'Pending') AS Status
+					FROM Ideas
+					WHERE CreatedDate >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+					ORDER BY CreatedDate DESC
+					LIMIT 50;
+				";
+				string sqlWithoutStatus = @"
 					SELECT IdeasID AS IdeaID, IdeasText AS IdeaText, CreatedDate, UpVotes, DownVotes
 					FROM Ideas
 					WHERE CreatedDate >= DATE_SUB(NOW(), INTERVAL 7 DAY)
@@ -464,21 +592,50 @@ namespace ProjectTemplate
 				";
 
 				using (MySqlConnection con = new MySqlConnection(getConString()))
-				using (MySqlCommand cmd = new MySqlCommand(sql, con))
 				{
 					con.Open();
-					using (MySqlDataReader rdr = cmd.ExecuteReader())
+					bool usedFallback = false;
+					try
 					{
-						while (rdr.Read())
+						using (MySqlCommand cmd = new MySqlCommand(sqlWithStatus, con))
+						using (MySqlDataReader rdr = cmd.ExecuteReader())
 						{
-							rows.Add(new IdeaRow
+							while (rdr.Read())
 							{
-								IdeaID = Convert.ToInt32(rdr["IdeaID"]),
-								IdeaText = rdr["IdeaText"].ToString(),
-								CreatedDate = Convert.ToDateTime(rdr["CreatedDate"]).ToString("yyyy-MM-dd HH:mm"),
-								UpVotes = Convert.ToInt32(rdr["UpVotes"]),
-								DownVotes = Convert.ToInt32(rdr["DownVotes"])
-							});
+								rows.Add(new IdeaRow
+								{
+									IdeaID = Convert.ToInt32(rdr["IdeaID"]),
+									IdeaText = rdr["IdeaText"].ToString(),
+									CreatedDate = Convert.ToDateTime(rdr["CreatedDate"]).ToString("yyyy-MM-dd HH:mm"),
+									UpVotes = Convert.ToInt32(rdr["UpVotes"]),
+									DownVotes = Convert.ToInt32(rdr["DownVotes"]),
+									Status = rdr["Status"].ToString()
+								});
+							}
+						}
+					}
+					catch
+					{
+						usedFallback = true;
+					}
+					if (usedFallback)
+					{
+						rows.Clear();
+						using (MySqlCommand cmd = new MySqlCommand(sqlWithoutStatus, con))
+						using (MySqlDataReader rdr = cmd.ExecuteReader())
+						{
+							while (rdr.Read())
+							{
+								rows.Add(new IdeaRow
+								{
+									IdeaID = Convert.ToInt32(rdr["IdeaID"]),
+									IdeaText = rdr["IdeaText"].ToString(),
+									CreatedDate = Convert.ToDateTime(rdr["CreatedDate"]).ToString("yyyy-MM-dd HH:mm"),
+									UpVotes = Convert.ToInt32(rdr["UpVotes"]),
+									DownVotes = Convert.ToInt32(rdr["DownVotes"]),
+									Status = "Pending"
+								});
+							}
 						}
 					}
 				}
@@ -488,6 +645,46 @@ namespace ProjectTemplate
 			}
 
 			return rows;
+		}
+
+		[WebMethod(EnableSession = true)]
+		[ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+		public BasicResult UpdateIdeaStatus(int ideaId, string status)
+		{
+			BasicResult result = new BasicResult();
+			if (!IsVerifiedSession())
+			{
+				result.success = false;
+				result.message = "Access Denied";
+				return result;
+			}
+			if (ideaId <= 0)
+			{
+				result.success = false;
+				result.message = "Invalid idea.";
+				return result;
+			}
+			string s = (status ?? "").Trim();
+			if (string.IsNullOrEmpty(s)) s = "Pending";
+			try
+			{
+				using (MySqlConnection con = new MySqlConnection(getConString()))
+				using (MySqlCommand cmd = new MySqlCommand("UPDATE Ideas SET IdeaStatus = @status WHERE IdeasID = @id", con))
+				{
+					cmd.Parameters.AddWithValue("@status", s);
+					cmd.Parameters.AddWithValue("@id", ideaId);
+					con.Open();
+					int updated = cmd.ExecuteNonQuery();
+					result.success = updated > 0;
+					result.message = updated > 0 ? "Status updated." : "Idea not found.";
+				}
+			}
+			catch (Exception ex)
+			{
+				result.success = false;
+				result.message = "Could not update: " + ex.Message;
+			}
+			return result;
 		}
 
 		private IdeaRow GetNextIdeaForAnon(string anonId, int? skipIdeaId = null)
